@@ -1,0 +1,14 @@
+installation:
+  version: 6.0.0-Beta.8
+  installDate: 2026-02-16T18:47:13.367Z
+  lastUpdated: 2026-02-16T18:47:13.367Z
+modules:
+  - name: core
+    version: 6.0.0-Beta.8
+    installDate: 2026-02-16T18:47:13.367Z
+    lastUpdated: 2026-02-16T18:47:13.367Z
+    source: built-in
+    npmPackage: null
+    repoUrl: null
+ides:
+  - trae
