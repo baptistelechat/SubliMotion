@@ -14,10 +14,10 @@ Afin d'inspecter rapidement des zones spécifiques de mon design
 
 ## Critères d'Acceptation
 
-- [ ] Boutons UI pour : Face, Dos, Gauche (Anse), Droite, Haut, Bas.
-- [ ] Cliquer sur un bouton anime la caméra vers la position correspondante.
-- [ ] L'animation est fluide (environ 0.5s - 1s).
-- [ ] Le mug reste centré.
+- [x] Boutons UI pour : Face, Dos, Gauche (Anse), Droite, Haut, Bas.
+- [x] Cliquer sur un bouton anime la caméra vers la position correspondante.
+- [x] L'animation est fluide (environ 0.5s - 1s).
+- [x] Le mug reste centré.
 
 ## Notes Techniques
 
@@ -34,6 +34,6 @@ Afin d'inspecter rapidement des zones spécifiques de mon design
 
 ## Définition de Terminé (Definition of Done)
 
-- [ ] Boutons implémentés dans l'UI.
-- [ ] La caméra s'anime correctement vers toutes les vues définies.
-- [ ] La transition est fluide et sans glitch.
+- [x] Boutons implémentés dans l'UI.
+- [x] La caméra s'anime correctement vers toutes les vues définies.
+- [x] La transition est fluide et sans glitch.

@@ -1,6 +1,16 @@
 import { create } from "zustand";
 
-export type CameraView = "front" | "back" | "left" | "right" | "iso1" | "iso2";
+export type CameraView =
+  | "front"
+  | "back"
+  | "left"
+  | "right"
+  | "top"
+  | "bottom"
+  | "iso1"
+  | "iso2"
+  | "iso3"
+  | "iso4";
 export type BackgroundType = "color" | "environment";
 
 export const SCENE_COLORS = {

@@ -7,11 +7,13 @@ import { CameraView, SCENE_COLORS, useSceneStore } from "@/store/useSceneStore";
 import { useTextureStore } from "@/store/useTextureStore";
 import {
   ArrowLeft,
+  ArrowLeftToLine,
+  ArrowRightToLine,
   Box,
   Check,
+  ChevronDown,
+  ChevronUp,
   Download,
-  Monitor,
-  RotateCw,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 
@@ -100,10 +102,28 @@ function EditorView() {
   ];
 
   const views: { id: CameraView; label: string; icon: React.ReactNode }[] = [
-    { id: "front", label: "Face", icon: <Monitor className="w-4 h-4" /> },
-    { id: "back", label: "Dos", icon: <RotateCw className="w-4 h-4" /> },
-    { id: "left", label: "Gauche", icon: <Box className="w-4 h-4" /> },
-    { id: "right", label: "Droite", icon: <Box className="w-4 h-4" /> },
+    { id: "front", label: "Face", icon: <ChevronUp className="size-4" /> },
+    { id: "back", label: "Dos", icon: <ChevronDown className="size-4" /> },
+    {
+      id: "left",
+      label: "Gauche",
+      icon: <ArrowRightToLine className="size-4" />,
+    },
+    {
+      id: "right",
+      label: "Droite",
+      icon: <ArrowLeftToLine className="size-4" />,
+    },
+    {
+      id: "top",
+      label: "Haut",
+      icon: <ArrowRightToLine className="size-4 rotate-90" />,
+    },
+    {
+      id: "bottom",
+      label: "Bas",
+      icon: <ArrowLeftToLine className="size-4 rotate-90" />,
+    },
   ];
 
   return (
@@ -128,7 +148,7 @@ function EditorView() {
         </div>
         <div className="flex items-center gap-2">
           <Button variant="default" className="gap-2">
-            <Download className="w-4 h-4" />
+            <Download className="size-4" />
             Exporter
           </Button>
         </div>
@@ -198,7 +218,7 @@ function EditorView() {
                 >
                   <div
                     className={cn(
-                      "absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all shadow-sm",
+                      "absolute top-0.5 size-4 bg-white rounded-full transition-all shadow-sm",
                       showGrid ? "right-0.5" : "left-0.5",
                     )}
                   ></div>
@@ -248,14 +268,28 @@ function EditorView() {
                 className="w-full justify-start gap-2"
                 onClick={() => setCameraView("iso1")}
               >
-                <Box className="w-4 h-4" /> ISO 1
+                <Box className="size-4" /> ISO 1
               </Button>
               <Button
                 variant={cameraView === "iso2" ? "default" : "outline"}
                 className="w-full justify-start gap-2"
                 onClick={() => setCameraView("iso2")}
               >
-                <Box className="w-4 h-4" /> ISO 2
+                <Box className="size-4" /> ISO 2
+              </Button>
+              <Button
+                variant={cameraView === "iso3" ? "default" : "outline"}
+                className="w-full justify-start gap-2"
+                onClick={() => setCameraView("iso3")}
+              >
+                <Box className="size-4" /> ISO 3
+              </Button>
+              <Button
+                variant={cameraView === "iso4" ? "default" : "outline"}
+                className="w-full justify-start gap-2"
+                onClick={() => setCameraView("iso4")}
+              >
+                <Box className="size-4" /> ISO 4
               </Button>
             </div>
           </div>

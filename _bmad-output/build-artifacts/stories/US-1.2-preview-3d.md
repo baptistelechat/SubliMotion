@@ -14,10 +14,10 @@ Afin de vérifier le placement du design sous tous les angles
 
 ## Critères d'Acceptation
 
-- [ ] L'utilisateur peut orbiter autour du mug à 360 degrés horizontalement.
-- [ ] L'utilisateur peut orbiter verticalement dans des limites raisonnables (ex: empêcher de voir sous la table).
-- [ ] Le zoom avant/arrière est possible mais limité (distance min/max).
-- [ ] La rotation est fluide et l'amortissement (damping) est activé.
+- [x] L'utilisateur peut orbiter autour du mug à 360 degrés horizontalement.
+- [x] L'utilisateur peut orbiter verticalement dans des limites raisonnables (ex: empêcher de voir sous la table).
+- [x] Le zoom avant/arrière est possible mais limité (distance min/max).
+- [x] La rotation est fluide et l'amortissement (damping) est activé.
 
 ## Notes Techniques
 
@@ -36,6 +36,6 @@ Afin de vérifier le placement du design sous tous les angles
 
 ## Définition de Terminé (Definition of Done)
 
-- [ ] OrbitControls configurés et réactifs.
-- [ ] Limites de zoom testées.
-- [ ] Contraintes d'angle vertical appliquées.
+- [x] OrbitControls configurés et réactifs.
+- [x] Limites de zoom testées.
+- [x] Contraintes d'angle vertical appliquées.

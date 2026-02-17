@@ -3,13 +3,13 @@
 import { useSceneStore } from "@/store/useSceneStore";
 import { useTextureStore } from "@/store/useTextureStore";
 import {
+  CameraControls,
   ContactShadows,
   Environment,
   Grid,
-  OrbitControls,
   useGLTF,
 } from "@react-three/drei";
-import { Canvas, useLoader, useThree } from "@react-three/fiber";
+import { Canvas, useLoader } from "@react-three/fiber";
 import { Suspense, useEffect, useMemo, useRef, type ElementRef } from "react";
 import * as THREE from "three";
 
@@ -22,36 +22,46 @@ const PRINT_LAYER_HEIGHT_SCALE = 0.96;
 
 function SceneController() {
   const cameraView = useSceneStore((state) => state.cameraView);
-  const { camera } = useThree();
-  const controlsRef = useRef<ElementRef<typeof OrbitControls>>(null);
+  const controlsRef = useRef<ElementRef<typeof CameraControls>>(null);
 
   useEffect(() => {
     if (!controlsRef.current) return;
 
-    const positions: Record<string, [number, number, number]> = {
-      front: [0, 1, 6],
-      back: [0, 1, -6],
-      left: [-6, 1, 0],
-      right: [6, 1, 0],
-      iso1: [4, 3, 5],
-      iso2: [-4, 3, 5],
+    const target: [number, number, number] = [0, -0.25, 0];
+
+    const viewConfigs: Record<
+      string,
+      { pos: [number, number, number]; target: [number, number, number] }
+    > = {
+      front: { pos: [0, 1.5, 8], target },
+      back: { pos: [0, 1.5, -8], target },
+      left: { pos: [-8, 1.5, 0], target },
+      right: { pos: [8, 1.5, 0], target },
+      top: { pos: [0.01, 10, 0], target }, // Epsilon to avoid gimbal lock
+      bottom: { pos: [0.01, -10, 0], target },
+      iso1: { pos: [6, 4, 7], target },
+      iso2: { pos: [-6, 4, 7], target },
+      iso3: { pos: [6, 4, -7], target },
+      iso4: { pos: [-6, 4, -7], target },
     };
 
-    const targetPos = positions[cameraView] || positions.iso1;
+    const config = viewConfigs[cameraView] || viewConfigs.iso1;
 
-    // Animation simple via interpolation (ou direct set pour l'instant)
-    camera.position.set(...targetPos);
-    controlsRef.current.update();
-  }, [cameraView, camera]);
+    controlsRef.current.setLookAt(
+      ...config.pos,
+      ...config.target,
+      true, // enableTransition
+    );
+  }, [cameraView]);
 
   return (
-    <OrbitControls
+    <CameraControls
       ref={controlsRef}
       makeDefault
-      enableDamping={true}
-      minDistance={5}
+      minDistance={2}
       maxDistance={15}
-      maxPolarAngle={Math.PI / 1.5}
+      maxPolarAngle={Math.PI}
+      smoothTime={0.8}
     />
   );
 }
@@ -217,7 +227,7 @@ export default function MugScene() {
     <div className="w-full h-full min-h-125 bg-gray-100 relative">
       <Canvas
         shadows
-        camera={{ position: [4, 3, 5], fov: 45 }}
+        camera={{ position: [6, 4, 7], fov: 45 }}
         gl={{ antialias: true }}
         dpr={[1, 2]}
       >
