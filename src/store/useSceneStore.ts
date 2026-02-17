@@ -13,6 +13,39 @@ export type CameraView =
   | "iso4";
 export type BackgroundType = "color" | "environment";
 
+export type AnimationTemplate =
+  | "zoom-in"
+  | "mug-rotation"
+  | "camera-rotation"
+  | "vertical-reveal"
+  | "horizontal-reveal";
+
+export const ANIMATION_TEMPLATES: Record<
+  AnimationTemplate,
+  { label: string; description: string }
+> = {
+  "zoom-in": {
+    label: "Zoom In",
+    description: "La caméra commence loin et se rapproche du mug",
+  },
+  "mug-rotation": {
+    label: "Mug Rotation",
+    description: "Le mug tourne sur lui-même",
+  },
+  "camera-rotation": {
+    label: "Camera Rotation",
+    description: "La caméra tourne autour du mug",
+  },
+  "vertical-reveal": {
+    label: "Vertical Reveal",
+    description: "Un mouvement lent de bas en haut",
+  },
+  "horizontal-reveal": {
+    label: "Horizontal Reveal",
+    description: "Un mouvement lent de côté",
+  },
+} as const;
+
 export const SCENE_COLORS = {
   "Gris clair": "#f3f4f6",
   "Gris moyen": "#9ca3af",
@@ -45,6 +78,13 @@ interface SceneState {
   cameraView: CameraView;
   setCameraView: (view: CameraView) => void;
 
+  // Animation Template
+  animationTemplate: AnimationTemplate;
+  setAnimationTemplate: (template: AnimationTemplate) => void;
+  // Trigger for re-running animation
+  animationTrigger: number;
+  triggerAnimation: () => void;
+
   // Options
   showGrid: boolean;
   toggleGrid: () => void;
@@ -63,7 +103,13 @@ export const useSceneStore = create<SceneState>((set) => ({
   cameraView: "iso1",
   setCameraView: (view) => set({ cameraView: view }),
 
-  // Options
+  // Default animation
+  animationTemplate: "zoom-in",
+  setAnimationTemplate: (template) => set({ animationTemplate: template }),
+  animationTrigger: 0,
+  triggerAnimation: () => set((state) => ({ animationTrigger: state.animationTrigger + 1 })),
+
+  // Default options
   showGrid: true,
   toggleGrid: () => set((state) => ({ showGrid: !state.showGrid })),
 }));

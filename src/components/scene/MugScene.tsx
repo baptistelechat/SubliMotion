@@ -22,8 +22,11 @@ const PRINT_LAYER_HEIGHT_SCALE = 0.96;
 
 function SceneController() {
   const cameraView = useSceneStore((state) => state.cameraView);
+  const animationTemplate = useSceneStore((state) => state.animationTemplate);
+  const animationTrigger = useSceneStore((state) => state.animationTrigger);
   const controlsRef = useRef<ElementRef<typeof CameraControls>>(null);
 
+  // Gestion des vues prédéfinies (boutons de vue)
   useEffect(() => {
     if (!controlsRef.current) return;
 
@@ -53,6 +56,48 @@ function SceneController() {
       true, // enableTransition
     );
   }, [cameraView]);
+
+  // Prévisualisation des animations
+  useEffect(() => {
+    if (!controlsRef.current || !animationTemplate) return;
+    const controls = controlsRef.current;
+    const target: [number, number, number] = [0, -0.25, 0];
+
+    const playPreview = async () => {
+      switch (animationTemplate) {
+        case "zoom-in":
+          // Start far away
+          await controls.setLookAt(0, 2, 20, ...target, false);
+          // Zoom in to Iso1
+          await controls.setLookAt(6, 4, 7, ...target, true);
+          break;
+
+        case "mug-rotation":
+        case "camera-rotation":
+          // Reset view first to Iso1
+          await controls.setLookAt(6, 4, 7, ...target, false);
+          // Rotate 360 degrees (azimuth)
+          await controls.rotate(Math.PI * 2, 0, true);
+          break;
+
+        case "vertical-reveal":
+          // Start bottom
+          await controls.setLookAt(0, -8, 4, ...target, false);
+          // Move up to Front
+          await controls.setLookAt(0, 1.5, 8, ...target, true);
+          break;
+
+        case "horizontal-reveal":
+          // Start side
+          await controls.setLookAt(-12, 1.5, 0, ...target, false);
+          // Move to Front
+          await controls.setLookAt(0, 1.5, 8, ...target, true);
+          break;
+      }
+    };
+
+    playPreview();
+  }, [animationTemplate, animationTrigger]);
 
   return (
     <CameraControls
