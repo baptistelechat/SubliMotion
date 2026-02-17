@@ -24,8 +24,8 @@ Afin de vérifier le placement du design sous tous les angles
 - **Librairie :** `@react-three/drei` -> `OrbitControls`.
 - **Configuration :**
   - `enableDamping={true}`
-  - `minDistance={2}`
-  - `maxDistance={10}`
+  - `minDistance={5}`
+  - `maxDistance={15}`
   - `maxPolarAngle={Math.PI / 1.5}` (pour restreindre la vue par le bas)
 - **Contexte :** S'assurer que les contrôles n'entrent pas en conflit avec le drag & drop si des superpositions sont utilisées.
 

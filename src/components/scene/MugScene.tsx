@@ -44,7 +44,16 @@ function SceneController() {
     controlsRef.current.update();
   }, [cameraView, camera]);
 
-  return <OrbitControls ref={controlsRef} makeDefault />;
+  return (
+    <OrbitControls
+      ref={controlsRef}
+      makeDefault
+      enableDamping={true}
+      minDistance={5}
+      maxDistance={15}
+      maxPolarAngle={Math.PI / 1.5}
+    />
+  );
 }
 
 function PrintLayer({
