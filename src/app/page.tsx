@@ -229,7 +229,7 @@ function EditorView() {
         </div>
 
         {/* Center Panel: 3D Canvas */}
-        <div className="flex-1 bg-gray-100/50 relative">
+        <div className="flex-1 bg-gray-100/50 relative touch-none">
           <MugScene />
 
           {/* Overlay Controls (Mobile/Quick) */}

@@ -153,12 +153,16 @@ function MugWithPrint() {
   }, [scene]);
 
   useEffect(() => {
+    // Debug: Log model structure for Epic 2 preparation
+    console.group("Mug Model Structure");
     scene.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
         child.castShadow = true;
         child.receiveShadow = true;
+        console.log("Mesh found:", child.name, "Material:", (child as THREE.Mesh).material);
       }
     });
+    console.groupEnd();
   }, [scene]);
 
   return (

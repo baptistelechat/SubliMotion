@@ -148,7 +148,7 @@ export function TextureUploader() {
                 <p className="text-sm font-medium">
                   {isDragActive
                     ? "Déposez l'image ici"
-                    : "Glissez une image ici"}
+                    : "Glissez ou cliquez pour ajouter"}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   JPG ou PNG uniquement
