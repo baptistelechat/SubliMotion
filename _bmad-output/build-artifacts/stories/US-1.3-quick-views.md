@@ -2,33 +2,38 @@
 
 **ID:** STORY-003
 **Epic:** 1 - Import & Visualisation (Core)
-**Status:** Active
-**Priority:** Medium
+**Statut:** Actif
+**Priorité:** Moyenne
 **Story Points:** 3
 
-## User Story
-As a user
-I want quick access buttons to align the camera to key faces (Front, Back, Handle, Top)
-So that I can quickly inspect specific areas of my design
+## Récit Utilisateur (User Story)
 
-## Acceptance Criteria
-- [ ] UI buttons for: Front, Back, Left (Handle), Right, Top, Bottom.
-- [ ] Clicking a button animates the camera to the corresponding position.
-- [ ] Animation is smooth (approx. 0.5s - 1s).
-- [ ] The mug remains centered.
+En tant qu'utilisateur
+Je veux des boutons d'accès rapide pour aligner la caméra sur les faces clés (Avant, Arrière, Anse, Haut)
+Afin d'inspecter rapidement des zones spécifiques de mon design
 
-## Technical Notes
-- **Library:** `CameraControls` from `@react-three/drei` (preferred over OrbitControls for programmatic movement) OR custom GSAP animation on camera position.
-- **Implementation:**
-  - Store camera positions/quaternions for each view.
-  - Use `controls.setLookAt(x, y, z, targetX, targetY, targetZ, true)` for smooth transition.
-- **UI:** Shadcn UI buttons in a toolbar overlay.
+## Critères d'Acceptation
 
-## Dependencies
+- [ ] Boutons UI pour : Face, Dos, Gauche (Anse), Droite, Haut, Bas.
+- [ ] Cliquer sur un bouton anime la caméra vers la position correspondante.
+- [ ] L'animation est fluide (environ 0.5s - 1s).
+- [ ] Le mug reste centré.
+
+## Notes Techniques
+
+- **Librairie :** `CameraControls` de `@react-three/drei` (préféré à OrbitControls pour le mouvement programmatique) OU animation GSAP personnalisée sur la position de la caméra.
+- **Implémentation :**
+  - Stocker les positions/quaternions de la caméra pour chaque vue.
+  - Utiliser `controls.setLookAt(x, y, z, targetX, targetY, targetZ, true)` pour une transition fluide.
+- **UI :** Boutons Shadcn UI dans une barre d'outils superposée.
+
+## Dépendances
+
 - `@react-three/drei` (CameraControls)
-- `shadcn/ui` (Button component)
+- `shadcn/ui` (Composant Button)
 
-## Definition of Done
-- [ ] Buttons implemented in UI.
-- [ ] Camera animates correctly to all defined views.
-- [ ] Transition is smooth and glitch-free.
+## Définition de Terminé (Definition of Done)
+
+- [ ] Boutons implémentés dans l'UI.
+- [ ] La caméra s'anime correctement vers toutes les vues définies.
+- [ ] La transition est fluide et sans glitch.

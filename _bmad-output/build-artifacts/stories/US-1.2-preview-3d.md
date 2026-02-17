@@ -2,35 +2,40 @@
 
 **ID:** STORY-002
 **Epic:** 1 - Import & Visualisation (Core)
-**Status:** Active
-**Priority:** High
+**Statut:** Actif
+**Priorité:** Haute
 **Story Points:** 3
 
-## User Story
-As a user
-I want to rotate the 3D mug freely
-So that I can verify the design placement from all angles
+## Récit Utilisateur (User Story)
 
-## Acceptance Criteria
-- [ ] User can orbit around the mug 360 degrees horizontally.
-- [ ] User can orbit vertically within reasonable limits (e.g., prevent looking from under the table).
-- [ ] Zoom in/out is possible but clamped (min/max distance).
-- [ ] Rotation is smooth and damping is enabled.
+En tant qu'utilisateur
+Je veux faire pivoter le mug 3D librement
+Afin de vérifier le placement du design sous tous les angles
 
-## Technical Notes
-- **Library:** `@react-three/drei` -> `OrbitControls`.
-- **Configuration:**
+## Critères d'Acceptation
+
+- [ ] L'utilisateur peut orbiter autour du mug à 360 degrés horizontalement.
+- [ ] L'utilisateur peut orbiter verticalement dans des limites raisonnables (ex: empêcher de voir sous la table).
+- [ ] Le zoom avant/arrière est possible mais limité (distance min/max).
+- [ ] La rotation est fluide et l'amortissement (damping) est activé.
+
+## Notes Techniques
+
+- **Librairie :** `@react-three/drei` -> `OrbitControls`.
+- **Configuration :**
   - `enableDamping={true}`
   - `minDistance={2}`
   - `maxDistance={10}`
-  - `maxPolarAngle={Math.PI / 1.5}` (to restrict looking from below)
-- **Context:** Ensure controls don't conflict with drag & drop if overlays are used.
+  - `maxPolarAngle={Math.PI / 1.5}` (pour restreindre la vue par le bas)
+- **Contexte :** S'assurer que les contrôles n'entrent pas en conflit avec le drag & drop si des superpositions sont utilisées.
 
-## Dependencies
+## Dépendances
+
 - `@react-three/drei`
 - `@react-three/fiber`
 
-## Definition of Done
-- [ ] OrbitControls configured and responsive.
-- [ ] Zoom limits tested.
-- [ ] Vertical angle constraints applied.
+## Définition de Terminé (Definition of Done)
+
+- [ ] OrbitControls configurés et réactifs.
+- [ ] Limites de zoom testées.
+- [ ] Contraintes d'angle vertical appliquées.
