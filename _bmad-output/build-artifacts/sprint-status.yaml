@@ -28,7 +28,7 @@ story_location: "_bmad-output/stories"
 
 development_status:
   epic-1: in-progress
-  1-1-drag-drop: ready-for-dev
+  1-1-drag-drop: done
   1-2-preview-3d: backlog
   1-3-quick-views: backlog
   epic-1-retrospective: optional

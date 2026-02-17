@@ -2,7 +2,7 @@
 
 **ID:** STORY-001
 **Epic:** 1 - Import & Visualisation (Core)
-**Statut:** Actif
+**Statut:** Terminé
 **Priorité:** Haute
 **Story Points:** 5
 
