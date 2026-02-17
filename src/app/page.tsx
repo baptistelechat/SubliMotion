@@ -5,7 +5,14 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { CameraView, SCENE_COLORS, useSceneStore } from "@/store/useSceneStore";
 import { useTextureStore } from "@/store/useTextureStore";
-import { ArrowLeft, Box, Download, Monitor, RotateCw } from "lucide-react";
+import {
+  ArrowLeft,
+  Box,
+  Check,
+  Download,
+  Monitor,
+  RotateCw,
+} from "lucide-react";
 import dynamic from "next/dynamic";
 
 const MugScene = dynamic(() => import("@/components/scene/MugScene"), {
@@ -22,7 +29,7 @@ const MugScene = dynamic(() => import("@/components/scene/MugScene"), {
 
 function LandingView() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-background text-foreground p-4">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-background text-foreground p-4 relative">
       <div className="max-w-3xl w-full space-y-8 text-center">
         <div className="space-y-2">
           <h1 className="text-4xl md:text-6xl font-bold bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent">
@@ -150,14 +157,25 @@ function EditorView() {
                   key={bg.value}
                   onClick={() => setBackgroundColor(bg.value)}
                   className={cn(
-                    "w-full aspect-square rounded-md border transition-all",
+                    "w-full aspect-square rounded-md border transition-all cursor-pointer flex items-center justify-center",
                     bg.class,
                     backgroundColor === bg.value
                       ? "ring-2 ring-primary ring-offset-2"
                       : "hover:ring-2 ring-primary/50",
                   )}
                   title={bg.name}
-                />
+                >
+                  <Check
+                    className={cn(
+                      "size-6",
+                      backgroundColor === bg.value
+                        ? bg.name === "Gris clair" || bg.name === "Gris moyen"
+                          ? "text-primary"
+                          : "text-secondary"
+                        : "hidden",
+                    )}
+                  />
+                </button>
               ))}
             </div>
           </div>

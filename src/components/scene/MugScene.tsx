@@ -10,19 +10,20 @@ import {
   useGLTF,
 } from "@react-three/drei";
 import { Canvas, useLoader, useThree } from "@react-three/fiber";
-import { Suspense, useEffect, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef, type ElementRef } from "react";
 import * as THREE from "three";
 
 // Preload pour éviter le waterfall
 useGLTF.preload("/models/mug/scene.gltf");
 
 const GAP = 0.27;
+const PRINT_LAYER_RADIUS_SCALE = 1.002;
+const PRINT_LAYER_HEIGHT_SCALE = 0.96;
 
 function SceneController() {
   const cameraView = useSceneStore((state) => state.cameraView);
   const { camera } = useThree();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const controlsRef = useRef<any>(null);
+  const controlsRef = useRef<ElementRef<typeof OrbitControls>>(null);
 
   useEffect(() => {
     if (!controlsRef.current) return;
@@ -82,9 +83,9 @@ function PrintLayer({
       {/* On centre la zone imprimable à l'opposé de l'anse (qui est souvent en Z+ ou X+) */}
       <cylinderGeometry
         args={[
-          radius * 1.002, // Rayon extérieur (plaque)
-          radius * 1.002, // Rayon intérieur (vide)
-          height * 0.96, // Hauteur totale (95% de la tasse)
+          radius * PRINT_LAYER_RADIUS_SCALE, // Rayon extérieur (plaque)
+          radius * PRINT_LAYER_RADIUS_SCALE, // Rayon intérieur (vide)
+          height * PRINT_LAYER_HEIGHT_SCALE, // Hauteur totale (95% de la tasse)
           64, // Nombre de segments horizontaux (64 pour une bonne qualité)
           1, // Nombre de segments verticaux (1 car on ne découpe pas verticalement)
           true,
@@ -209,7 +210,7 @@ export default function MugScene() {
         shadows
         camera={{ position: [4, 3, 5], fov: 45 }}
         gl={{ antialias: true }}
-        dpr={[1, 1.5]}
+        dpr={[1, 2]}
       >
         <ambientLight intensity={0.5} />
         <directionalLight

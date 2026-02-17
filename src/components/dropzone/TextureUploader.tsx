@@ -6,18 +6,39 @@ import { cn } from "@/lib/utils";
 import { useTextureStore } from "@/store/useTextureStore";
 import { Image as ImageIcon, Upload, X } from "lucide-react";
 import { useCallback } from "react";
-import { useDropzone } from "react-dropzone";
+import { useDropzone, type FileRejection } from "react-dropzone";
+import { toast } from "sonner";
 
 export function TextureUploader() {
   const { textureUrl, setTexture, clearTexture } = useTextureStore();
 
   const onDrop = useCallback(
-    (acceptedFiles: File[]) => {
+    (acceptedFiles: File[], fileRejections: FileRejection[]) => {
+      // Gestion des erreurs (fichiers rejetés)
+      if (fileRejections.length > 0) {
+        fileRejections.forEach((rejection) => {
+          if (rejection.errors[0]?.code === "file-invalid-type") {
+            toast.error("Format non supporté", {
+              description: "Veuillez utiliser un fichier JPG ou PNG.",
+            });
+          } else {
+            toast.error("Fichier rejeté", {
+              description: rejection.errors.map((e) => e.message).join(", "),
+            });
+          }
+        });
+        return;
+      }
+
       const file = acceptedFiles[0];
       if (file) {
         const objectUrl = URL.createObjectURL(file);
         const img = new Image();
         img.onload = () => {
+          toast.success("Texture importée", {
+            description: "L'image a été appliquée sur le modèle.",
+          });
+
           const maxDimension = 2048;
           let width = img.width;
           let height = img.height;

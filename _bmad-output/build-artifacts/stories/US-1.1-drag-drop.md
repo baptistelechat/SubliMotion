@@ -14,11 +14,11 @@ Afin de l'appliquer instantanément sur la texture du mug 3D
 
 ## Critères d'Acceptation
 
-- [ ] L'utilisateur peut glisser un fichier image depuis son bureau vers la zone du canvas.
-- [ ] Formats supportés : JPG et PNG.
-- [ ] L'image s'applique correctement sur le mapping de texture du mug (UV).
-- [ ] Un message d'erreur apparaît si le format n'est pas supporté.
-- [ ] La texture se met à jour immédiatement sans rechargement de page.
+- [x] L'utilisateur peut glisser un fichier image depuis son bureau vers la zone du canvas.
+- [x] Formats supportés : JPG et PNG.
+- [x] L'image s'applique correctement sur le mapping de texture du mug (UV).
+- [x] Un message d'erreur apparaît si le format n'est pas supporté.
+- [x] La texture se met à jour immédiatement sans rechargement de page.
 
 ## Notes Techniques
 
@@ -36,7 +36,7 @@ Afin de l'appliquer instantanément sur la texture du mug 3D
 
 ## Définition de Terminé (Definition of Done)
 
-- [ ] Code terminé et linté.
-- [ ] Le glisser-déposer fonctionne de manière fluide.
-- [ ] Gestion des erreurs pour les fichiers invalides implémentée.
-- [ ] Testé avec différents ratios d'aspect.
+- [x] Code terminé et linté.
+- [x] Le glisser-déposer fonctionne de manière fluide.
+- [x] Gestion des erreurs pour les fichiers invalides implémentée.
+- [x] Testé avec différents ratios d'aspect.
