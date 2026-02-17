@@ -20,12 +20,26 @@ export const SCENE_COLORS = {
   Noir: "#000000",
 } as const;
 
+export const MUG_COLORS = {
+  Blanc: "#ffffff",
+  Noir: "#000000",
+  Rouge: "#ef4444",
+  Bleu: "#3b82f6",
+  Jaune: "#eab308",
+  Rose: "#ec4899",
+  Vert: "#22c55e",
+} as const;
+
 export type SceneColor = (typeof SCENE_COLORS)[keyof typeof SCENE_COLORS];
 
 interface SceneState {
   // Background
   backgroundColor: SceneColor;
   setBackgroundColor: (color: SceneColor) => void;
+
+  // Mug Colors
+  mugColor: string;
+  setMugColor: (color: string) => void;
 
   // Camera View
   cameraView: CameraView;
@@ -40,6 +54,10 @@ export const useSceneStore = create<SceneState>((set) => ({
   // Default white background
   backgroundColor: SCENE_COLORS["Gris clair"],
   setBackgroundColor: (color) => set({ backgroundColor: color }),
+
+  // Default mug colors
+  mugColor: "#ffffff",
+  setMugColor: (color) => set({ mugColor: color }),
 
   // Default camera view
   cameraView: "iso1",

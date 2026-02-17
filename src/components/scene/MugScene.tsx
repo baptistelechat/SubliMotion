@@ -129,6 +129,7 @@ function PrintLayer({
 function MugWithPrint() {
   const { scene } = useGLTF("/models/mug/scene.gltf");
   const textureUrl = useTextureStore((state) => state.textureUrl);
+  const mugColor = useSceneStore((state) => state.mugColor);
 
   // Calculs géométriques
   const { height, radius, scale, yOffset } = useMemo(() => {
@@ -157,13 +158,38 @@ function MugWithPrint() {
     console.group("Mug Model Structure");
     scene.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
-        child.castShadow = true;
-        child.receiveShadow = true;
-        console.log("Mesh found:", child.name, "Material:", (child as THREE.Mesh).material);
+        const mesh = child as THREE.Mesh;
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+
+        // Clone material to ensure we can modify it independently
+        if (!Array.isArray(mesh.material)) {
+          mesh.material = mesh.material.clone();
+        }
+
+        console.log("Mesh found:", child.name, "Material:", mesh.material);
       }
     });
     console.groupEnd();
   }, [scene]);
+
+  // Apply colors
+  useEffect(() => {
+    scene.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) {
+        const mesh = child as THREE.Mesh;
+
+        if (!Array.isArray(mesh.material)) {
+          const material = mesh.material as THREE.MeshStandardMaterial;
+
+          // Apply color to Material.001 as requested
+          if (material.name === "Material.001") {
+            material.color.set(mugColor);
+          }
+        }
+      }
+    });
+  }, [scene, mugColor]);
 
   return (
     <group>

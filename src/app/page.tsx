@@ -1,5 +1,6 @@
 "use client";
 
+import { ColorControls } from "@/components/ColorControls";
 import { TextureUploader } from "@/components/dropzone/TextureUploader";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -165,6 +166,13 @@ function EditorView() {
             <div className="h-48">
               <TextureUploader />
             </div>
+          </div>
+
+          <div>
+            <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
+              Personnalisation
+            </h2>
+            <ColorControls />
           </div>
 
           <div>
