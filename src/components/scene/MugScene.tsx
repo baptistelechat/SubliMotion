@@ -22,13 +22,29 @@ const PRINT_LAYER_HEIGHT_SCALE = 0.96;
 
 function SceneController() {
   const cameraView = useSceneStore((state) => state.cameraView);
+  const cameraViewTrigger = useSceneStore((state) => state.cameraViewTrigger);
   const animationTemplate = useSceneStore((state) => state.animationTemplate);
   const animationTrigger = useSceneStore((state) => state.animationTrigger);
+  const setCameraView = useSceneStore((state) => state.setCameraView);
   const controlsRef = useRef<ElementRef<typeof CameraControls>>(null);
 
-  // Gestion des vues prédéfinies (boutons de vue)
+  // Détecter quand l'utilisateur déplace la caméra manuellement
   useEffect(() => {
     if (!controlsRef.current) return;
+    const controls = controlsRef.current;
+
+    const onStart = () => {
+      // Si l'utilisateur commence à interagir, désélectionner la vue actuelle
+      setCameraView(null);
+    };
+
+    controls.addEventListener("controlstart", onStart);
+    return () => controls.removeEventListener("controlstart", onStart);
+  }, [setCameraView]);
+
+  // // Gestion des vues prédéfinies (boutons de vue)
+  useEffect(() => {
+    if (!controlsRef.current || !cameraView) return;
 
     const target: [number, number, number] = [0, -0.25, 0];
 
@@ -48,14 +64,16 @@ function SceneController() {
       iso4: { pos: [-6, 4, -7], target },
     };
 
-    const config = viewConfigs[cameraView] || viewConfigs.iso1;
+    if (!cameraView) return;
+
+    const config = viewConfigs[cameraView];
 
     controlsRef.current.setLookAt(
       ...config.pos,
       ...config.target,
       true, // enableTransition
     );
-  }, [cameraView]);
+  }, [cameraView, cameraViewTrigger]);
 
   // Prévisualisation des animations
   useEffect(() => {
@@ -103,9 +121,9 @@ function SceneController() {
     <CameraControls
       ref={controlsRef}
       makeDefault
-      minDistance={2}
+      minDistance={5}
       maxDistance={15}
-      maxPolarAngle={Math.PI}
+      maxPolarAngle={Math.PI / 1.5}
       smoothTime={0.8}
     />
   );

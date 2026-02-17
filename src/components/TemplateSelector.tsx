@@ -46,7 +46,7 @@ export function TemplateSelector() {
             key={key}
             onClick={() => handleSelect(key)}
             className={cn(
-              "flex flex-col items-center justify-center p-3 rounded-lg border text-sm transition-all hover:bg-accent hover:text-accent-foreground border-input bg-background text-muted-foreground",
+              "flex flex-col items-center justify-center p-3 rounded-lg border text-sm transition-all hover:bg-accent text-accent-foreground border-input bg-background",
             )}
             title={template.description}
           >

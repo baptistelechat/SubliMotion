@@ -75,8 +75,11 @@ interface SceneState {
   setMugColor: (color: string) => void;
 
   // Camera View
-  cameraView: CameraView;
-  setCameraView: (view: CameraView) => void;
+  cameraView: CameraView | null;
+  setCameraView: (view: CameraView | null) => void;
+  // Trigger for re-running camera view
+  cameraViewTrigger: number;
+  triggerCameraView: () => void;
 
   // Animation Template
   animationTemplate: AnimationTemplate;
@@ -102,12 +105,16 @@ export const useSceneStore = create<SceneState>((set) => ({
   // Default camera view
   cameraView: "iso1",
   setCameraView: (view) => set({ cameraView: view }),
+  cameraViewTrigger: 0,
+  triggerCameraView: () =>
+    set((state) => ({ cameraViewTrigger: state.cameraViewTrigger + 1 })),
 
   // Default animation
   animationTemplate: "zoom-in",
   setAnimationTemplate: (template) => set({ animationTemplate: template }),
   animationTrigger: 0,
-  triggerAnimation: () => set((state) => ({ animationTrigger: state.animationTrigger + 1 })),
+  triggerAnimation: () =>
+    set((state) => ({ animationTrigger: state.animationTrigger + 1 })),
 
   // Default options
   showGrid: true,

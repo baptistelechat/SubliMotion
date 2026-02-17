@@ -81,9 +81,18 @@ function EditorView() {
     setBackgroundColor,
     cameraView,
     setCameraView,
+    triggerCameraView,
     showGrid,
     toggleGrid,
   } = useSceneStore();
+
+  const handleViewSelect = (view: CameraView) => {
+    if (cameraView === view) {
+      triggerCameraView();
+    } else {
+      setCameraView(view);
+    }
+  };
 
   const backgrounds = [
     {
@@ -270,7 +279,7 @@ function EditorView() {
                     key={view.id}
                     variant={cameraView === view.id ? "default" : "outline"}
                     className="w-full justify-start gap-2"
-                    onClick={() => setCameraView(view.id)}
+                    onClick={() => handleViewSelect(view.id)}
                   >
                     {view.icon} {view.label}
                   </Button>
@@ -286,28 +295,28 @@ function EditorView() {
                 <Button
                   variant={cameraView === "iso1" ? "default" : "outline"}
                   className="w-full justify-start gap-2"
-                  onClick={() => setCameraView("iso1")}
+                  onClick={() => handleViewSelect("iso1")}
                 >
                   <Box className="size-4" /> ISO 1
                 </Button>
                 <Button
                   variant={cameraView === "iso2" ? "default" : "outline"}
                   className="w-full justify-start gap-2"
-                  onClick={() => setCameraView("iso2")}
+                  onClick={() => handleViewSelect("iso2")}
                 >
                   <Box className="size-4" /> ISO 2
                 </Button>
                 <Button
                   variant={cameraView === "iso3" ? "default" : "outline"}
                   className="w-full justify-start gap-2"
-                  onClick={() => setCameraView("iso3")}
+                  onClick={() => handleViewSelect("iso3")}
                 >
                   <Box className="size-4" /> ISO 3
                 </Button>
                 <Button
                   variant={cameraView === "iso4" ? "default" : "outline"}
                   className="w-full justify-start gap-2"
-                  onClick={() => setCameraView("iso4")}
+                  onClick={() => handleViewSelect("iso4")}
                 >
                   <Box className="size-4" /> ISO 4
                 </Button>
