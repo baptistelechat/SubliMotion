@@ -75,6 +75,20 @@ interface SceneState {
   setExportProgress: (progress: number) => void;
   startExportTrigger: number;
   triggerExport: () => void;
+
+  // Social Pack
+  isSocialPackOpen: boolean;
+  setIsSocialPackOpen: (isOpen: boolean) => void;
+
+  // Social Pack Export
+  isExportingSocialPack: boolean;
+  setIsExportingSocialPack: (isExporting: boolean) => void;
+  socialPackProgress: number;
+  setSocialPackProgress: (progress: number) => void;
+  socialPackStatus: string;
+  setSocialPackStatus: (status: string) => void;
+  socialPackText: string;
+  setSocialPackText: (text: string) => void;
 }
 
 export const useSceneStore = create<SceneState>((set) => ({
@@ -89,7 +103,7 @@ export const useSceneStore = create<SceneState>((set) => ({
     set((state) => ({
       cameraView: view,
       cameraViewTrigger: state.cameraViewTrigger + 1,
-      // Reset animation when changing view
+      // If setting a view, clear animation
       animationTemplate: null,
     })),
   cameraViewTrigger: 0,
@@ -101,10 +115,8 @@ export const useSceneStore = create<SceneState>((set) => ({
     set((state) => ({
       animationTemplate: template,
       animationTrigger: state.animationTrigger + 1,
-      // Reset view when changing animation if it's not null
-      cameraView: template ? null : state.cameraView,
-      // Auto-play when selecting a new template
-      isVideoPlaying: template ? true : false,
+      // If setting animation, clear static view (optional, maybe we want to start from a view)
+      cameraView: null,
     })),
   animationTrigger: 0,
   triggerAnimation: () =>
@@ -115,15 +127,27 @@ export const useSceneStore = create<SceneState>((set) => ({
 
   isVideoPreviewOpen: false,
   setIsVideoPreviewOpen: (isOpen) => set({ isVideoPreviewOpen: isOpen }),
-
   isVideoPlaying: false,
   setIsVideoPlaying: (isPlaying) => set({ isVideoPlaying: isPlaying }),
 
-  // Export
   isExporting: false,
   setIsExporting: (isExporting) => set({ isExporting }),
   exportProgress: 0,
   setExportProgress: (progress) => set({ exportProgress: progress }),
   startExportTrigger: 0,
-  triggerExport: () => set((state) => ({ startExportTrigger: state.startExportTrigger + 1 })),
+  triggerExport: () =>
+    set((state) => ({ startExportTrigger: state.startExportTrigger + 1 })),
+
+  isSocialPackOpen: false,
+  setIsSocialPackOpen: (isOpen) => set({ isSocialPackOpen: isOpen }),
+
+  isExportingSocialPack: false,
+  setIsExportingSocialPack: (isExporting) =>
+    set({ isExportingSocialPack: isExporting }),
+  socialPackProgress: 0,
+  setSocialPackProgress: (progress) => set({ socialPackProgress: progress }),
+  socialPackStatus: "",
+  setSocialPackStatus: (status) => set({ socialPackStatus: status }),
+  socialPackText: "",
+  setSocialPackText: (text) => set({ socialPackText: text }),
 }));

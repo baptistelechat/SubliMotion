@@ -2,8 +2,9 @@
 
 import { ANIMATION_CONFIG, DEFAULT_TARGET } from "@/config/animations";
 import { useSceneStore } from "@/store/useSceneStore";
-import { useFrame, useThree } from "@react-three/fiber";
+import { useThree } from "@react-three/fiber";
 import { ThreeCanvas } from "@remotion/three";
+import { useLayoutEffect } from "react";
 import {
   AbsoluteFill,
   interpolate,
@@ -22,7 +23,7 @@ export function VideoCamera({ frame, durationInFrames }: VideoCameraProps) {
   const { camera } = useThree();
   const animationTemplate = useSceneStore((state) => state.animationTemplate);
 
-  useFrame(() => {
+  useLayoutEffect(() => {
     if (!animationTemplate) return;
 
     // Type guard to ensure animationTemplate is a valid key in ANIMATION_CONFIG
@@ -178,7 +179,7 @@ export function VideoCamera({ frame, durationInFrames }: VideoCameraProps) {
         camera.position.set(6, 4, 7);
         camera.lookAt(DEFAULT_TARGET);
     }
-  });
+  }, [frame, animationTemplate, durationInFrames, camera]);
 
   return null;
 }
