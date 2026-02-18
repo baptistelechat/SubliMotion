@@ -1,7 +1,11 @@
 "use client";
 
+import { ColorControls } from "@/components/ColorControls";
+import MobileBlocker from "@/components/MobileBlocker";
+import { TemplateSelector } from "@/components/TemplateSelector";
 import { TextureUploader } from "@/components/dropzone/TextureUploader";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { CameraView, SCENE_COLORS, useSceneStore } from "@/store/useSceneStore";
 import { useTextureStore } from "@/store/useTextureStore";
@@ -42,8 +46,23 @@ function LandingView() {
           </p>
         </div>
 
-        <div className="w-full max-w-xl mx-auto h-80 bg-card rounded-xl shadow-lg border p-2">
-          <TextureUploader />
+        <div className="w-full max-w-xl mx-auto h-80 bg-card rounded-xl shadow-lg border p-2 relative">
+          <div className="hidden md:block h-full">
+            <TextureUploader />
+          </div>
+          <div className="md:hidden h-full flex flex-col items-center justify-center p-6 bg-muted/20 rounded-lg">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+              <Box className="w-6 h-6 text-primary" />
+            </div>
+            <h3 className="font-semibold text-lg mb-2">Version Mobile</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              L&apos;éditeur 3D nécessite un écran plus large pour une
+              expérience optimale.
+            </p>
+            <p className="text-sm font-medium text-primary">
+              Connectez-vous sur ordinateur pour créer !
+            </p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto pt-8">
@@ -78,9 +97,18 @@ function EditorView() {
     setBackgroundColor,
     cameraView,
     setCameraView,
+    triggerCameraView,
     showGrid,
     toggleGrid,
   } = useSceneStore();
+
+  const handleViewSelect = (view: CameraView) => {
+    if (cameraView === view) {
+      triggerCameraView();
+    } else {
+      setCameraView(view);
+    }
+  };
 
   const backgrounds = [
     {
@@ -127,7 +155,8 @@ function EditorView() {
   ];
 
   return (
-    <main className="flex min-h-screen flex-col bg-background text-foreground">
+    <main className="flex h-screen overflow-hidden flex-col bg-background text-foreground">
+      <MobileBlocker />
       {/* Header */}
       <header className="border-b bg-card px-4 py-3 flex items-center justify-between h-16">
         <div className="flex items-center gap-4">
@@ -157,76 +186,92 @@ function EditorView() {
       {/* Editor Layout: Left (Tools) - Center (3D) - Right (Views) */}
       <div className="flex-1 flex flex-col md:flex-row h-[calc(100vh-64px)] overflow-hidden">
         {/* Left Panel: Tools */}
-        <div className="w-full md:w-80 border-r bg-card/50 p-4 flex flex-col gap-6 overflow-y-auto">
-          <div>
-            <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
-              Texture
-            </h2>
-            <div className="h-48">
-              <TextureUploader />
+        <ScrollArea className="w-full md:w-80 border-r bg-card/50 h-full">
+          <div className="p-4 flex flex-col gap-6">
+            <div>
+              <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
+                Texture
+              </h2>
+              <div className="h-48">
+                <TextureUploader />
+              </div>
             </div>
-          </div>
 
-          <div>
-            <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
-              Fond
-            </h2>
-            <div className="grid grid-cols-4 gap-2">
-              {backgrounds.map((bg) => (
-                <button
-                  key={bg.value}
-                  onClick={() => setBackgroundColor(bg.value)}
-                  className={cn(
-                    "w-full aspect-square rounded-md border transition-all cursor-pointer flex items-center justify-center",
-                    bg.class,
-                    backgroundColor === bg.value
-                      ? "ring-2 ring-primary ring-offset-2"
-                      : "hover:ring-2 ring-primary/50",
-                  )}
-                  title={bg.name}
-                >
-                  <Check
+            <div>
+              <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
+                Personnalisation
+              </h2>
+              <ColorControls />
+            </div>
+
+            <div>
+              <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
+                Fond
+              </h2>
+              <div className="grid grid-cols-4 gap-2">
+                {backgrounds.map((bg) => (
+                  <button
+                    key={bg.value}
+                    onClick={() => setBackgroundColor(bg.value)}
                     className={cn(
-                      "size-6",
+                      "w-full aspect-square rounded-md border transition-all cursor-pointer flex items-center justify-center",
+                      bg.class,
                       backgroundColor === bg.value
-                        ? bg.name === "Gris clair" || bg.name === "Gris moyen"
-                          ? "text-primary"
-                          : "text-secondary"
-                        : "hidden",
+                        ? "ring-2 ring-primary ring-offset-2"
+                        : "hover:ring-2 ring-primary/50",
                     )}
-                  />
-                </button>
-              ))}
+                    title={bg.name}
+                  >
+                    <Check
+                      className={cn(
+                        "size-6",
+                        backgroundColor === bg.value
+                          ? bg.name === "Gris clair" || bg.name === "Gris moyen"
+                            ? "text-primary"
+                            : "text-secondary"
+                          : "hidden",
+                      )}
+                    />
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div>
-            <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
-              Options
-            </h2>
-            <div className="space-y-2">
-              <div
-                className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50 cursor-pointer"
-                onClick={toggleGrid}
-              >
-                <span className="text-sm">Afficher la grille</span>
+            <div>
+              <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
+                Animation
+              </h2>
+              <TemplateSelector />
+            </div>
+
+            <div>
+              <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
+                Options
+              </h2>
+              <div className="space-y-2">
                 <div
-                  className={cn(
-                    "w-9 h-5 rounded-full relative transition-colors",
-                    showGrid ? "bg-primary" : "bg-muted",
-                  )}
+                  className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50 cursor-pointer"
+                  onClick={toggleGrid}
                 >
+                  <span className="text-sm">Afficher la grille</span>
                   <div
                     className={cn(
-                      "absolute top-0.5 size-4 bg-white rounded-full transition-all shadow-sm",
-                      showGrid ? "right-0.5" : "left-0.5",
+                      "w-9 h-5 rounded-full relative transition-colors",
+                      showGrid ? "bg-primary" : "bg-muted",
                     )}
-                  ></div>
+                  >
+                    <div
+                      className={cn(
+                        "absolute top-0.5 size-4 bg-white rounded-full transition-all shadow-sm",
+                        showGrid ? "right-0.5" : "left-0.5",
+                      )}
+                    ></div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </ScrollArea>
 
         {/* Center Panel: 3D Canvas */}
         <div className="flex-1 bg-gray-100/50 relative touch-none">
@@ -239,61 +284,63 @@ function EditorView() {
         </div>
 
         {/* Right Panel: Views */}
-        <div className="w-full md:w-64 border-l bg-card/50 p-4 hidden md:flex flex-col gap-6">
-          <div>
-            <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
-              Points de vue
-            </h2>
-            <div className="grid grid-cols-2 gap-2">
-              {views.map((view) => (
-                <Button
-                  key={view.id}
-                  variant={cameraView === view.id ? "default" : "outline"}
-                  className="w-full justify-start gap-2"
-                  onClick={() => setCameraView(view.id)}
-                >
-                  {view.icon} {view.label}
-                </Button>
-              ))}
+        <ScrollArea className="w-full md:w-64 border-l bg-card/50 hidden md:block h-full">
+          <div className="p-4 flex flex-col gap-6">
+            <div>
+              <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
+                Points de vue
+              </h2>
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
+                {views.map((view) => (
+                  <Button
+                    key={view.id}
+                    variant={cameraView === view.id ? "default" : "outline"}
+                    className="w-full justify-start gap-2"
+                    onClick={() => handleViewSelect(view.id)}
+                  >
+                    {view.icon} {view.label}
+                  </Button>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div>
-            <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
-              Isométrique
-            </h2>
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                variant={cameraView === "iso1" ? "default" : "outline"}
-                className="w-full justify-start gap-2"
-                onClick={() => setCameraView("iso1")}
-              >
-                <Box className="size-4" /> ISO 1
-              </Button>
-              <Button
-                variant={cameraView === "iso2" ? "default" : "outline"}
-                className="w-full justify-start gap-2"
-                onClick={() => setCameraView("iso2")}
-              >
-                <Box className="size-4" /> ISO 2
-              </Button>
-              <Button
-                variant={cameraView === "iso3" ? "default" : "outline"}
-                className="w-full justify-start gap-2"
-                onClick={() => setCameraView("iso3")}
-              >
-                <Box className="size-4" /> ISO 3
-              </Button>
-              <Button
-                variant={cameraView === "iso4" ? "default" : "outline"}
-                className="w-full justify-start gap-2"
-                onClick={() => setCameraView("iso4")}
-              >
-                <Box className="size-4" /> ISO 4
-              </Button>
+            <div>
+              <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
+                Isométrique
+              </h2>
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
+                <Button
+                  variant={cameraView === "iso1" ? "default" : "outline"}
+                  className="w-full justify-start gap-2"
+                  onClick={() => handleViewSelect("iso1")}
+                >
+                  <Box className="size-4" /> ISO 1
+                </Button>
+                <Button
+                  variant={cameraView === "iso2" ? "default" : "outline"}
+                  className="w-full justify-start gap-2"
+                  onClick={() => handleViewSelect("iso2")}
+                >
+                  <Box className="size-4" /> ISO 2
+                </Button>
+                <Button
+                  variant={cameraView === "iso3" ? "default" : "outline"}
+                  className="w-full justify-start gap-2"
+                  onClick={() => handleViewSelect("iso3")}
+                >
+                  <Box className="size-4" /> ISO 3
+                </Button>
+                <Button
+                  variant={cameraView === "iso4" ? "default" : "outline"}
+                  className="w-full justify-start gap-2"
+                  onClick={() => handleViewSelect("iso4")}
+                >
+                  <Box className="size-4" /> ISO 4
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
+        </ScrollArea>
       </div>
     </main>
   );

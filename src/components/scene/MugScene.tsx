@@ -22,10 +22,29 @@ const PRINT_LAYER_HEIGHT_SCALE = 0.96;
 
 function SceneController() {
   const cameraView = useSceneStore((state) => state.cameraView);
+  const cameraViewTrigger = useSceneStore((state) => state.cameraViewTrigger);
+  const animationTemplate = useSceneStore((state) => state.animationTemplate);
+  const animationTrigger = useSceneStore((state) => state.animationTrigger);
+  const setCameraView = useSceneStore((state) => state.setCameraView);
   const controlsRef = useRef<ElementRef<typeof CameraControls>>(null);
 
+  // Détecter quand l'utilisateur déplace la caméra manuellement
   useEffect(() => {
     if (!controlsRef.current) return;
+    const controls = controlsRef.current;
+
+    const onStart = () => {
+      // Si l'utilisateur commence à interagir, désélectionner la vue actuelle
+      setCameraView(null);
+    };
+
+    controls.addEventListener("controlstart", onStart);
+    return () => controls.removeEventListener("controlstart", onStart);
+  }, [setCameraView]);
+
+  // // Gestion des vues prédéfinies (boutons de vue)
+  useEffect(() => {
+    if (!controlsRef.current || !cameraView) return;
 
     const target: [number, number, number] = [0, -0.25, 0];
 
@@ -45,22 +64,67 @@ function SceneController() {
       iso4: { pos: [-6, 4, -7], target },
     };
 
-    const config = viewConfigs[cameraView] || viewConfigs.iso1;
+    if (!cameraView) return;
+
+    const config = viewConfigs[cameraView];
 
     controlsRef.current.setLookAt(
       ...config.pos,
       ...config.target,
       true, // enableTransition
     );
-  }, [cameraView]);
+  }, [cameraView, cameraViewTrigger]);
+
+  // Prévisualisation des animations
+  useEffect(() => {
+    if (!controlsRef.current || !animationTemplate) return;
+    const controls = controlsRef.current;
+    const target: [number, number, number] = [0, -0.25, 0];
+
+    const playPreview = async () => {
+      setCameraView(null);
+      switch (animationTemplate) {
+        case "zoom-in":
+          // Start far away
+          await controls.setLookAt(0, 2, 20, ...target, false);
+          // Zoom in to Iso1
+          await controls.setLookAt(6, 4, 7, ...target, true);
+          break;
+
+        case "mug-rotation":
+        case "camera-rotation":
+          // Reset view first to Iso1
+          await controls.setLookAt(6, 4, 7, ...target, false);
+          // Rotate 360 degrees (azimuth)
+          await controls.rotate(Math.PI * 2, 0, true);
+          break;
+
+        case "vertical-reveal":
+          // Start bottom
+          await controls.setLookAt(0, -8, 4, ...target, false);
+          // Move up to Front
+          await controls.setLookAt(0, 1.5, 8, ...target, true);
+          break;
+
+        case "horizontal-reveal":
+          // Start side
+          await controls.setLookAt(-12, 1.5, 0, ...target, false);
+          // Move to Front
+          await controls.setLookAt(0, 1.5, 8, ...target, true);
+          break;
+      }
+    };
+
+    playPreview();
+  }, [animationTemplate, animationTrigger, setCameraView]);
 
   return (
     <CameraControls
       ref={controlsRef}
       makeDefault
-      minDistance={2}
+      minDistance={5}
       maxDistance={15}
-      maxPolarAngle={Math.PI}
+      maxPolarAngle={Math.PI / 1.5}
       smoothTime={0.8}
     />
   );
@@ -129,6 +193,7 @@ function PrintLayer({
 function MugWithPrint() {
   const { scene } = useGLTF("/models/mug/scene.gltf");
   const textureUrl = useTextureStore((state) => state.textureUrl);
+  const mugColor = useSceneStore((state) => state.mugColor);
 
   // Calculs géométriques
   const { height, radius, scale, yOffset } = useMemo(() => {
@@ -154,16 +219,41 @@ function MugWithPrint() {
 
   useEffect(() => {
     // Debug: Log model structure for Epic 2 preparation
-    console.group("Mug Model Structure");
+    // console.group("Mug Model Structure");
     scene.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
-        child.castShadow = true;
-        child.receiveShadow = true;
-        console.log("Mesh found:", child.name, "Material:", (child as THREE.Mesh).material);
+        const mesh = child as THREE.Mesh;
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+
+        // Clone material to ensure we can modify it independently
+        if (!Array.isArray(mesh.material)) {
+          mesh.material = mesh.material.clone();
+        }
+
+        console.log("Mesh found:", child.name, "Material:", mesh.material);
       }
     });
     console.groupEnd();
   }, [scene]);
+
+  // Apply colors
+  useEffect(() => {
+    scene.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) {
+        const mesh = child as THREE.Mesh;
+
+        if (!Array.isArray(mesh.material)) {
+          const material = mesh.material as THREE.MeshStandardMaterial;
+
+          // Apply color to Material.001 as requested
+          if (material.name === "Material.001") {
+            material.color.set(mugColor);
+          }
+        }
+      }
+    });
+  }, [scene, mugColor]);
 
   return (
     <group>

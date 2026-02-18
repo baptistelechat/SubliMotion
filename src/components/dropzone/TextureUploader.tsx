@@ -1,16 +1,14 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useTextureStore } from "@/store/useTextureStore";
-import { Image as ImageIcon, Upload, X } from "lucide-react";
+import { Upload } from "lucide-react";
 import { useCallback } from "react";
 import { useDropzone, type FileRejection } from "react-dropzone";
 import { toast } from "sonner";
 
 export function TextureUploader() {
-  const { textureUrl, setTexture, clearTexture } = useTextureStore();
+  const { textureUrl, setTexture } = useTextureStore();
 
   const onDrop = useCallback(
     (acceptedFiles: File[], fileRejections: FileRejection[]) => {
@@ -92,72 +90,49 @@ export function TextureUploader() {
     });
 
   return (
-    <div className="w-full h-full relative">
-      <Card className="p-4 bg-background/90 backdrop-blur-sm border-muted shadow-sm h-full flex flex-col overflow-hidden">
-        <div className="flex justify-between items-center mb-4 shrink-0">
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <ImageIcon className="w-5 h-5" />
-            Texture
-          </h2>
-          {textureUrl && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-              onClick={clearTexture}
-              title="Supprimer la texture"
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          )}
-        </div>
+    <div className="w-full h-full relative border border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center justify-center bg-gray-50/50 hover:bg-gray-50 transition-colors">
+      <div
+        {...getRootProps()}
+        className={cn(
+          "w-full h-full flex flex-col items-center justify-center cursor-pointer transition-colors",
+          isDragActive && "bg-primary/5",
+          isDragReject && "bg-destructive/5",
+        )}
+      >
+        <input {...getInputProps()} />
 
-        <div
-          {...getRootProps()}
-          className={cn(
-            "border-2 border-dashed rounded-lg p-4 transition-colors cursor-pointer flex flex-col items-center justify-center text-center gap-2 flex-1 min-h-0 overflow-hidden",
-            isDragActive
-              ? "border-primary bg-primary/5"
-              : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50",
-            isDragReject && "border-destructive bg-destructive/5",
-            textureUrl && "border-solid border-primary/20 p-0",
-          )}
-        >
-          <input {...getInputProps()} />
-
-          {textureUrl ? (
-            <div className="relative w-full h-full rounded-md overflow-hidden bg-muted flex items-center justify-center">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={textureUrl}
-                alt="Texture preview"
-                className="w-full h-full object-contain"
-              />
-              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                <p className="text-white text-xs font-medium">
-                  Changer l&apos;image
-                </p>
-              </div>
+        {textureUrl ? (
+          <div className="relative w-full h-full rounded-md overflow-hidden bg-muted flex items-center justify-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={textureUrl}
+              alt="Texture preview"
+              className="w-full h-full object-contain"
+            />
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+              <p className="text-white text-xs font-medium">
+                Changer l&apos;image
+              </p>
             </div>
-          ) : (
-            <>
-              <div className="p-3 rounded-full bg-muted text-muted-foreground mb-1 shrink-0">
-                <Upload className="w-6 h-6" />
-              </div>
-              <div className="space-y-1 shrink-0">
-                <p className="text-sm font-medium">
-                  {isDragActive
-                    ? "Déposez l'image ici"
-                    : "Glissez ou cliquez pour ajouter"}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  JPG ou PNG uniquement
-                </p>
-              </div>
-            </>
-          )}
-        </div>
-      </Card>
+          </div>
+        ) : (
+          <>
+            <div className="p-3 rounded-full bg-muted text-muted-foreground mb-1 shrink-0">
+              <Upload className="w-6 h-6" />
+            </div>
+            <div className="space-y-1 shrink-0">
+              <p className="text-sm font-medium">
+                {isDragActive
+                  ? "Déposez l'image ici"
+                  : "Glissez ou cliquez pour ajouter"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                JPG ou PNG uniquement
+              </p>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
