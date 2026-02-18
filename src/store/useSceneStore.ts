@@ -103,7 +103,7 @@ export const useSceneStore = create<SceneState>((set) => ({
   setMugColor: (color) => set({ mugColor: color }),
 
   // Default camera view
-  cameraView: "iso1",
+  cameraView: null,
   setCameraView: (view) => set({ cameraView: view }),
   cameraViewTrigger: 0,
   triggerCameraView: () =>

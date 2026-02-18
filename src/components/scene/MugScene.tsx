@@ -82,6 +82,7 @@ function SceneController() {
     const target: [number, number, number] = [0, -0.25, 0];
 
     const playPreview = async () => {
+      setCameraView(null);
       switch (animationTemplate) {
         case "zoom-in":
           // Start far away
