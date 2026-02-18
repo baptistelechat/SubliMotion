@@ -116,7 +116,7 @@ function SceneController() {
     };
 
     playPreview();
-  }, [animationTemplate, animationTrigger]);
+  }, [animationTemplate, animationTrigger, setCameraView]);
 
   return (
     <CameraControls
@@ -219,7 +219,7 @@ function MugWithPrint() {
 
   useEffect(() => {
     // Debug: Log model structure for Epic 2 preparation
-    console.group("Mug Model Structure");
+    // console.group("Mug Model Structure");
     scene.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
         const mesh = child as THREE.Mesh;

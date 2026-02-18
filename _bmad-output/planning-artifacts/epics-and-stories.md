@@ -38,18 +38,27 @@ Based on PRD v1.0
 **Description:** L'utilisateur peut changer la couleur de l'anse et de l'intérieur du mug (presets ou color picker).
 **Acceptance Criteria:**
 
-- [ ] Sélecteur de couleur disponible pour l'anse.
-- [ ] Sélecteur de couleur disponible pour l'intérieur du mug.
-- [ ] La modification de couleur est visible instantanément sur le modèle 3D.
+- [x] Sélecteur de couleur disponible pour l'anse.
+- [x] Sélecteur de couleur disponible pour l'intérieur du mug.
+- [x] La modification de couleur est visible instantanément sur le modèle 3D.
 
 ### US 2.2 - Sélection de Template Vidéo
 
 **Description:** L'utilisateur choisit parmi une liste de scénarios d'animation prédéfinis (ex: "Zoom In", "Rotation 360", "Slow Reveal").
 **Acceptance Criteria:**
 
-- [ ] Liste déroulante ou grille de templates vidéo disponibles.
-- [ ] Sélectionner un template met à jour la configuration de l'animation.
-- [ ] Au moins 3 templates de base sont disponibles (Zoom In, Rotation 360, Reveal).
+- [x] Liste déroulante ou grille de templates vidéo disponibles.
+- [x] Sélectionner un template met à jour la configuration de l'animation.
+- [x] Au moins 3 templates de base sont disponibles (Zoom In, Rotation 360, Reveal).
+
+### US 2.3 - Mobile Blocker (Desktop Only)
+
+**Description:** Empêcher l'accès à l'application d'édition sur mobile pour garantir une bonne UX en attendant une version responsive.
+**Acceptance Criteria:**
+
+- [x] Détection des appareils mobiles (largeur d'écran < 768px).
+- [x] Affichage d'un écran de blocage explicite ("Veuillez utiliser un ordinateur").
+- [x] L'application reste accessible sur Desktop.
 
 ## Épopée 3 : Génération & Export (Output)
 
@@ -80,3 +89,13 @@ Based on PRD v1.0
 - [ ] Une zone de texte affiche une suggestion de légende.
 - [ ] Une liste de hashtags pertinents est affichée.
 - [ ] Bouton "Copier" pour récupérer le texte facilement.
+
+## Épopée 4 : Mobile Experience (Future)
+
+### US 4.1 - Responsive Editor UI
+
+**Description:** Adapter l'interface d'édition pour les écrans mobiles (Bottom Sheet, contrôles tactiles).
+**Acceptance Criteria:**
+
+- [ ] Les panneaux d'outils sont accessibles sans masquer la vue 3D.
+- [ ] Les contrôles tactiles sont fluides.

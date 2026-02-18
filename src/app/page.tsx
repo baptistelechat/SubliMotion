@@ -1,6 +1,7 @@
 "use client";
 
 import { ColorControls } from "@/components/ColorControls";
+import MobileBlocker from "@/components/MobileBlocker";
 import { TemplateSelector } from "@/components/TemplateSelector";
 import { TextureUploader } from "@/components/dropzone/TextureUploader";
 import { Button } from "@/components/ui/button";
@@ -45,8 +46,23 @@ function LandingView() {
           </p>
         </div>
 
-        <div className="w-full max-w-xl mx-auto h-80 bg-card rounded-xl shadow-lg border p-2">
-          <TextureUploader />
+        <div className="w-full max-w-xl mx-auto h-80 bg-card rounded-xl shadow-lg border p-2 relative">
+          <div className="hidden md:block h-full">
+            <TextureUploader />
+          </div>
+          <div className="md:hidden h-full flex flex-col items-center justify-center p-6 bg-muted/20 rounded-lg">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+              <Box className="w-6 h-6 text-primary" />
+            </div>
+            <h3 className="font-semibold text-lg mb-2">Version Mobile</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              L&apos;éditeur 3D nécessite un écran plus large pour une
+              expérience optimale.
+            </p>
+            <p className="text-sm font-medium text-primary">
+              Connectez-vous sur ordinateur pour créer !
+            </p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto pt-8">
@@ -140,6 +156,7 @@ function EditorView() {
 
   return (
     <main className="flex h-screen overflow-hidden flex-col bg-background text-foreground">
+      <MobileBlocker />
       {/* Header */}
       <header className="border-b bg-card px-4 py-3 flex items-center justify-between h-16">
         <div className="flex items-center gap-4">
@@ -273,7 +290,7 @@ function EditorView() {
               <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
                 Points de vue
               </h2>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
                 {views.map((view) => (
                   <Button
                     key={view.id}
@@ -291,7 +308,7 @@ function EditorView() {
               <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
                 Isométrique
               </h2>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
                 <Button
                   variant={cameraView === "iso1" ? "default" : "outline"}
                   className="w-full justify-start gap-2"

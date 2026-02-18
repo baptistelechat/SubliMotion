@@ -1,4 +1,4 @@
-generated: 2026-02-17
+generated: 2026-02-18
 project: SubliMotion
 project_key: SUBLIMOTION
 tracking_system: file-system
@@ -33,10 +33,11 @@ development_status:
   1-3-quick-views: done
   epic-1-retrospective: done
 
-  epic-2: in-progress
+  epic-2: done
   2-1-color-choice: done
   2-2-template-selection: done
-  epic-2-retrospective: optional
+  2-3-mobile-blocker: done
+  epic-2-retrospective: done
 
   epic-3: backlog
   3-1-video-preview: backlog
