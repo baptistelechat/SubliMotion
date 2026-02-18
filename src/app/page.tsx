@@ -18,6 +18,7 @@ import {
   ChevronDown,
   ChevronUp,
   Download,
+  Film,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 
@@ -32,6 +33,22 @@ const MugScene = dynamic(() => import("@/components/scene/MugScene"), {
     </div>
   ),
 });
+
+const VideoPreview = dynamic(
+  () =>
+    import("@/components/video/VideoPreview").then((mod) => mod.VideoPreview),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center w-full h-full bg-gray-50 text-muted-foreground">
+        <div className="flex flex-col items-center gap-2">
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+          <p>Chargement de la vidéo...</p>
+        </div>
+      </div>
+    ),
+  },
+);
 
 function LandingView() {
   return (
@@ -100,6 +117,9 @@ function EditorView() {
     triggerCameraView,
     showGrid,
     toggleGrid,
+    isVideoPreviewOpen,
+    setIsVideoPreviewOpen,
+    animationTemplate,
   } = useSceneStore();
 
   const handleViewSelect = (view: CameraView) => {
@@ -176,6 +196,18 @@ function EditorView() {
           </h1>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setIsVideoPreviewOpen(!isVideoPreviewOpen)}
+            className="gap-2"
+          >
+            {isVideoPreviewOpen ? (
+              <Film className="size-4" />
+            ) : (
+              <Box className="size-4" />
+            )}
+            {isVideoPreviewOpen ? "Vidéo" : "Scène 3D"}
+          </Button>
           <Button variant="default" className="gap-2">
             <Download className="size-4" />
             Exporter
@@ -274,73 +306,111 @@ function EditorView() {
         </ScrollArea>
 
         {/* Center Panel: 3D Canvas */}
-        <div className="flex-1 bg-gray-100/50 relative touch-none">
-          <MugScene />
+        <div className="flex-1 bg-gray-100/50 relative touch-none overflow-hidden">
+          <div
+            className={cn(
+              "absolute inset-0 w-full h-full transition-all duration-700 ease-in-out",
+              !isVideoPreviewOpen
+                ? "opacity-100 visible scale-100 translate-x-0"
+                : "opacity-0 invisible scale-95 -translate-x-12 pointer-events-none",
+            )}
+          >
+            <MugScene />
+          </div>
+
+          <div
+            className={cn(
+              "absolute inset-0 w-full h-full transition-all duration-700 ease-in-out",
+              isVideoPreviewOpen
+                ? "opacity-100 visible scale-100 translate-x-0"
+                : "opacity-0 invisible scale-105 translate-x-12 pointer-events-none",
+            )}
+          >
+            <VideoPreview />
+          </div>
 
           {/* Overlay Controls (Mobile/Quick) */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-background/80 backdrop-blur rounded-full px-4 py-2 shadow-lg border flex gap-4 md:hidden">
+          <div
+            className={cn(
+              "absolute bottom-4 left-1/2 -translate-x-1/2 bg-background/80 backdrop-blur rounded-full px-4 py-2 shadow-lg border flex gap-4 md:hidden transition-all duration-500",
+              !isVideoPreviewOpen
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-10 pointer-events-none",
+            )}
+          >
             <span className="text-xs font-medium">Toucher pour tourner</span>
           </div>
         </div>
 
         {/* Right Panel: Views */}
-        <ScrollArea className="w-full md:w-64 border-l bg-card/50 hidden md:block h-full">
-          <div className="p-4 flex flex-col gap-6">
-            <div>
-              <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
-                Points de vue
-              </h2>
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
-                {views.map((view) => (
-                  <Button
-                    key={view.id}
-                    variant={cameraView === view.id ? "default" : "outline"}
-                    className="w-full justify-start gap-2"
-                    onClick={() => handleViewSelect(view.id)}
-                  >
-                    {view.icon} {view.label}
-                  </Button>
-                ))}
-              </div>
-            </div>
+        <div
+          className={cn(
+            "border-l bg-card/50 hidden md:block h-full transition-all duration-700 ease-in-out overflow-hidden",
+            !isVideoPreviewOpen
+              ? "w-64 opacity-100"
+              : "w-0 opacity-0 border-l-0",
+          )}
+        >
+          <div className="w-64 h-full">
+            <ScrollArea className="w-full h-full">
+              <div className="p-4 flex flex-col gap-6">
+                <div>
+                  <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
+                    Points de vue
+                  </h2>
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
+                    {views.map((view) => (
+                      <Button
+                        key={view.id}
+                        variant={cameraView === view.id ? "default" : "outline"}
+                        className="w-full justify-start gap-2"
+                        onClick={() => handleViewSelect(view.id)}
+                      >
+                        {view.icon} {view.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
 
-            <div>
-              <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
-                Isométrique
-              </h2>
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
-                <Button
-                  variant={cameraView === "iso1" ? "default" : "outline"}
-                  className="w-full justify-start gap-2"
-                  onClick={() => handleViewSelect("iso1")}
-                >
-                  <Box className="size-4" /> ISO 1
-                </Button>
-                <Button
-                  variant={cameraView === "iso2" ? "default" : "outline"}
-                  className="w-full justify-start gap-2"
-                  onClick={() => handleViewSelect("iso2")}
-                >
-                  <Box className="size-4" /> ISO 2
-                </Button>
-                <Button
-                  variant={cameraView === "iso3" ? "default" : "outline"}
-                  className="w-full justify-start gap-2"
-                  onClick={() => handleViewSelect("iso3")}
-                >
-                  <Box className="size-4" /> ISO 3
-                </Button>
-                <Button
-                  variant={cameraView === "iso4" ? "default" : "outline"}
-                  className="w-full justify-start gap-2"
-                  onClick={() => handleViewSelect("iso4")}
-                >
-                  <Box className="size-4" /> ISO 4
-                </Button>
+                <div>
+                  <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
+                    Isométrique
+                  </h2>
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
+                    <Button
+                      variant={cameraView === "iso1" ? "default" : "outline"}
+                      className="w-full justify-start gap-2"
+                      onClick={() => handleViewSelect("iso1")}
+                    >
+                      <Box className="size-4" /> ISO 1
+                    </Button>
+                    <Button
+                      variant={cameraView === "iso2" ? "default" : "outline"}
+                      className="w-full justify-start gap-2"
+                      onClick={() => handleViewSelect("iso2")}
+                    >
+                      <Box className="size-4" /> ISO 2
+                    </Button>
+                    <Button
+                      variant={cameraView === "iso3" ? "default" : "outline"}
+                      className="w-full justify-start gap-2"
+                      onClick={() => handleViewSelect("iso3")}
+                    >
+                      <Box className="size-4" /> ISO 3
+                    </Button>
+                    <Button
+                      variant={cameraView === "iso4" ? "default" : "outline"}
+                      className="w-full justify-start gap-2"
+                      onClick={() => handleViewSelect("iso4")}
+                    >
+                      <Box className="size-4" /> ISO 4
+                    </Button>
+                  </div>
+                </div>
               </div>
-            </div>
+            </ScrollArea>
           </div>
-        </ScrollArea>
+        </div>
       </div>
     </main>
   );

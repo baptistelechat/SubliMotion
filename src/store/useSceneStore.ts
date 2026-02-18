@@ -1,3 +1,4 @@
+import { AnimationTemplate } from "@/config/animations";
 import { create } from "zustand";
 
 export type CameraView =
@@ -13,38 +14,7 @@ export type CameraView =
   | "iso4";
 export type BackgroundType = "color" | "environment";
 
-export type AnimationTemplate =
-  | "zoom-in"
-  | "mug-rotation"
-  | "camera-rotation"
-  | "vertical-reveal"
-  | "horizontal-reveal";
-
-export const ANIMATION_TEMPLATES: Record<
-  AnimationTemplate,
-  { label: string; description: string }
-> = {
-  "zoom-in": {
-    label: "Zoom In",
-    description: "La caméra commence loin et se rapproche du mug",
-  },
-  "mug-rotation": {
-    label: "Mug Rotation",
-    description: "Le mug tourne sur lui-même",
-  },
-  "camera-rotation": {
-    label: "Camera Rotation",
-    description: "La caméra tourne autour du mug",
-  },
-  "vertical-reveal": {
-    label: "Vertical Reveal",
-    description: "Un mouvement lent de bas en haut",
-  },
-  "horizontal-reveal": {
-    label: "Horizontal Reveal",
-    description: "Un mouvement lent de côté",
-  },
-} as const;
+export { type AnimationTemplate };
 
 export const SCENE_COLORS = {
   "Gris clair": "#f3f4f6",
@@ -82,8 +52,8 @@ interface SceneState {
   triggerCameraView: () => void;
 
   // Animation Template
-  animationTemplate: AnimationTemplate;
-  setAnimationTemplate: (template: AnimationTemplate) => void;
+  animationTemplate: AnimationTemplate | null;
+  setAnimationTemplate: (template: AnimationTemplate | null) => void;
   // Trigger for re-running animation
   animationTrigger: number;
   triggerAnimation: () => void;
@@ -91,32 +61,52 @@ interface SceneState {
   // Options
   showGrid: boolean;
   toggleGrid: () => void;
+
+  // Video Preview
+  isVideoPreviewOpen: boolean;
+  setIsVideoPreviewOpen: (isOpen: boolean) => void;
+  isVideoPlaying: boolean;
+  setIsVideoPlaying: (isPlaying: boolean) => void;
 }
 
 export const useSceneStore = create<SceneState>((set) => ({
-  // Default white background
   backgroundColor: SCENE_COLORS["Gris clair"],
   setBackgroundColor: (color) => set({ backgroundColor: color }),
 
-  // Default mug colors
-  mugColor: "#ffffff",
+  mugColor: MUG_COLORS.Blanc,
   setMugColor: (color) => set({ mugColor: color }),
 
-  // Default camera view
   cameraView: null,
-  setCameraView: (view) => set({ cameraView: view }),
+  setCameraView: (view) =>
+    set((state) => ({
+      cameraView: view,
+      cameraViewTrigger: state.cameraViewTrigger + 1,
+      // Reset animation when changing view
+      animationTemplate: null,
+    })),
   cameraViewTrigger: 0,
   triggerCameraView: () =>
     set((state) => ({ cameraViewTrigger: state.cameraViewTrigger + 1 })),
 
-  // Default animation
   animationTemplate: "zoom-in",
-  setAnimationTemplate: (template) => set({ animationTemplate: template }),
+  setAnimationTemplate: (template) =>
+    set((state) => ({
+      animationTemplate: template,
+      animationTrigger: state.animationTrigger + 1,
+      // Reset view when changing animation if it's not null
+      cameraView: template ? null : state.cameraView,
+      // Auto-play when selecting a new template
+      isVideoPlaying: template ? true : false,
+    })),
   animationTrigger: 0,
   triggerAnimation: () =>
     set((state) => ({ animationTrigger: state.animationTrigger + 1 })),
 
-  // Default options
   showGrid: true,
   toggleGrid: () => set((state) => ({ showGrid: !state.showGrid })),
+
+  isVideoPreviewOpen: false,
+  setIsVideoPreviewOpen: (isOpen) => set({ isVideoPreviewOpen: isOpen }),
+  isVideoPlaying: true,
+  setIsVideoPlaying: (isPlaying) => set({ isVideoPlaying: isPlaying }),
 }));

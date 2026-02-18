@@ -11,6 +11,9 @@
   "dependencies": {
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
+    "@remotion/cli": "^4.0.424",
+    "@remotion/player": "^4.0.424",
+    "@remotion/three": "^4.0.424",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.568.0",
@@ -20,6 +23,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-dropzone": "^15.0.0",
+    "remotion": "^4.0.424",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.1",
     "three": "^0.182.0",

@@ -1,24 +1,15 @@
 "use client";
 
+import { ANIMATION_CONFIG } from "@/config/animations";
 import { useSceneStore } from "@/store/useSceneStore";
-import { useTextureStore } from "@/store/useTextureStore";
-import {
-  CameraControls,
-  ContactShadows,
-  Environment,
-  Grid,
-  useGLTF,
-} from "@react-three/drei";
-import { Canvas, useLoader } from "@react-three/fiber";
-import { Suspense, useEffect, useMemo, useRef, type ElementRef } from "react";
+import { CameraControls, useGLTF } from "@react-three/drei";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { useEffect, useRef, useState, type ElementRef } from "react";
 import * as THREE from "three";
+import { MugContent, MugLights } from "./MugContent";
 
 // Preload pour éviter le waterfall
 useGLTF.preload("/models/mug/scene.gltf");
-
-const GAP = 0.27;
-const PRINT_LAYER_RADIUS_SCALE = 1.002;
-const PRINT_LAYER_HEIGHT_SCALE = 0.96;
 
 function SceneController() {
   const cameraView = useSceneStore((state) => state.cameraView);
@@ -26,7 +17,20 @@ function SceneController() {
   const animationTemplate = useSceneStore((state) => state.animationTemplate);
   const animationTrigger = useSceneStore((state) => state.animationTrigger);
   const setCameraView = useSceneStore((state) => state.setCameraView);
+  const setAnimationTemplate = useSceneStore(
+    (state) => state.setAnimationTemplate,
+  );
+  const isVideoPreviewOpen = useSceneStore((state) => state.isVideoPreviewOpen);
   const controlsRef = useRef<ElementRef<typeof CameraControls>>(null);
+  const { clock } = useThree();
+  const startTimeRef = useRef(0);
+  const completedRef = useRef(false);
+
+  // Reset start time when animation template or trigger changes
+  useEffect(() => {
+    startTimeRef.current = clock.getElapsedTime();
+    completedRef.current = false;
+  }, [animationTemplate, animationTrigger, clock]);
 
   // Détecter quand l'utilisateur déplace la caméra manuellement
   useEffect(() => {
@@ -75,48 +79,189 @@ function SceneController() {
     );
   }, [cameraView, cameraViewTrigger]);
 
-  // Prévisualisation des animations
-  useEffect(() => {
+  // Animation Loop for// Gestion de l'animation
+  useFrame(({ clock }) => {
+    if (isVideoPreviewOpen) return;
     if (!controlsRef.current || !animationTemplate) return;
     const controls = controlsRef.current;
-    const target: [number, number, number] = [0, -0.25, 0];
 
-    const playPreview = async () => {
-      setCameraView(null);
-      switch (animationTemplate) {
-        case "zoom-in":
-          // Start far away
-          await controls.setLookAt(0, 2, 20, ...target, false);
-          // Zoom in to Iso1
-          await controls.setLookAt(6, 4, 7, ...target, true);
-          break;
+    // Type assertion to bypass TypeScript check if needed, though with the import it should be fine
+    // But since we just moved the type definition, we might need to ensure ANIMATION_CONFIG is typed correctly
+    const config =
+      ANIMATION_CONFIG[animationTemplate as keyof typeof ANIMATION_CONFIG];
+    if (!config) return;
 
-        case "mug-rotation":
-        case "camera-rotation":
-          // Reset view first to Iso1
-          await controls.setLookAt(6, 4, 7, ...target, false);
-          // Rotate 360 degrees (azimuth)
-          await controls.rotate(Math.PI * 2, 0, true);
-          break;
+    // Use elapsed time from startTime
+    const time = clock.getElapsedTime();
+    const elapsed = time - startTimeRef.current;
+    const duration = config.durationInSeconds;
 
-        case "vertical-reveal":
-          // Start bottom
-          await controls.setLookAt(0, -8, 4, ...target, false);
-          // Move up to Front
-          await controls.setLookAt(0, 1.5, 8, ...target, true);
-          break;
-
-        case "horizontal-reveal":
-          // Start side
-          await controls.setLookAt(-12, 1.5, 0, ...target, false);
-          // Move to Front
-          await controls.setLookAt(0, 1.5, 8, ...target, true);
-          break;
+    let progress = 0;
+    // Keep looping for mug and camera rotation
+    if (
+      animationTemplate === "mug-rotation" ||
+      animationTemplate === "camera-rotation"
+    ) {
+      progress = (elapsed % duration) / duration;
+    } else {
+      // Play once for others
+      progress = Math.min(elapsed / duration, 1);
+      if (progress >= 1 && !completedRef.current) {
+        completedRef.current = true;
+        setAnimationTemplate(null);
       }
-    };
+    }
 
-    playPreview();
-  }, [animationTemplate, animationTrigger, setCameraView]);
+    switch (animationTemplate) {
+      case "zoom-in":
+      case "zoom-out":
+        if (config.cameraStart && config.cameraEnd) {
+          const currentPos = new THREE.Vector3().lerpVectors(
+            config.cameraStart,
+            config.cameraEnd,
+            progress,
+          );
+          // Use setLookAt to ensure CameraControls state is updated correctly
+          controls.setLookAt(
+            currentPos.x,
+            currentPos.y,
+            currentPos.z,
+            config.target.x,
+            config.target.y,
+            config.target.z,
+            false, // disable transition for immediate update
+          );
+        }
+        break;
+
+      case "spiral-up":
+        if (config.cameraStart && config.cameraEnd) {
+          const startRadius = Math.sqrt(
+            Math.pow(config.cameraStart.x - config.target.x, 2) +
+              Math.pow(config.cameraStart.z - config.target.z, 2),
+          );
+          const endRadius = Math.sqrt(
+            Math.pow(config.cameraEnd.x - config.target.x, 2) +
+              Math.pow(config.cameraEnd.z - config.target.z, 2),
+          );
+
+          // Interpolate radius and Y
+          const currentRadius = THREE.MathUtils.lerp(
+            startRadius,
+            endRadius,
+            progress,
+          );
+          const currentY = THREE.MathUtils.lerp(
+            config.cameraStart.y,
+            config.cameraEnd.y,
+            progress,
+          );
+
+          // Rotate around Y (e.g., 2 full turns)
+          const angle = progress * Math.PI * 4;
+
+          const x = config.target.x + Math.cos(angle) * currentRadius;
+          const z = config.target.z + Math.sin(angle) * currentRadius;
+
+          controls.setLookAt(
+            x,
+            currentY,
+            z,
+            config.target.x,
+            config.target.y,
+            config.target.z,
+            false,
+          );
+        }
+        break;
+
+      case "dramatic-zoom":
+        if (config.cameraStart && config.cameraEnd) {
+          // Fast start, slow end (Ease Out Quart)
+          const easedProgress = 1 - Math.pow(1 - progress, 4);
+          const currentPos = new THREE.Vector3().lerpVectors(
+            config.cameraStart,
+            config.cameraEnd,
+            easedProgress,
+          );
+          controls.setLookAt(
+            currentPos.x,
+            currentPos.y,
+            currentPos.z,
+            config.target.x,
+            config.target.y,
+            config.target.z,
+            false,
+          );
+        }
+        break;
+
+      case "camera-rotation":
+        if (config.cameraStart) {
+          // Continuous rotation
+          const radius = Math.sqrt(
+            Math.pow(config.cameraStart.x - config.target.x, 2) +
+              Math.pow(config.cameraStart.z - config.target.z, 2),
+          );
+          const startAngle = Math.atan2(
+            config.cameraStart.z - config.target.z,
+            config.cameraStart.x - config.target.x,
+          );
+
+          const angle = startAngle + progress * Math.PI * 2;
+
+          const x = config.target.x + Math.cos(angle) * radius;
+          const z = config.target.z + Math.sin(angle) * radius;
+
+          controls.setLookAt(
+            x,
+            config.cameraStart.y,
+            z,
+            config.target.x,
+            config.target.y,
+            config.target.z,
+            false,
+          );
+        }
+        break;
+
+      case "mug-rotation":
+        // For mug rotation, camera is static (set once or maintained)
+        if (config.cameraStart) {
+          controls.setLookAt(
+            config.cameraStart.x,
+            config.cameraStart.y,
+            config.cameraStart.z,
+            config.target.x,
+            config.target.y,
+            config.target.z,
+            false,
+          );
+        }
+        break;
+
+      case "vertical-reveal":
+      case "horizontal-reveal":
+        if (config.cameraStart && config.cameraEnd) {
+          const easedProgress = 1 - Math.pow(1 - progress, 3);
+          const currentPos = new THREE.Vector3().lerpVectors(
+            config.cameraStart,
+            config.cameraEnd,
+            easedProgress,
+          );
+          controls.setLookAt(
+            currentPos.x,
+            currentPos.y,
+            currentPos.z,
+            config.target.x,
+            config.target.y,
+            config.target.z,
+            false,
+          );
+        }
+        break;
+    }
+  });
 
   return (
     <CameraControls
@@ -130,190 +275,37 @@ function SceneController() {
   );
 }
 
-function PrintLayer({
-  url,
-  radius,
-  height,
+function MugRotationController({
+  children,
 }: {
-  url: string;
-  radius: number;
-  height: number;
+  children: (rotation: number) => React.ReactNode;
 }) {
-  // Augmenter la résolution pour éviter le z-fighting sur la texture
-  const texture = useLoader(THREE.TextureLoader, url);
-
-  const clonedTexture = useMemo(() => {
-    const t = texture.clone();
-    t.colorSpace = THREE.SRGBColorSpace;
-    t.flipY = true; // Remis à true (default) pour corriger l'orientation "tête en bas"
-    t.wrapS = THREE.RepeatWrapping;
-    t.wrapT = THREE.RepeatWrapping;
-    t.needsUpdate = true;
-    return t;
-  }, [texture]);
+  const animationTemplate = useSceneStore((state) => state.animationTemplate);
+  const animationTrigger = useSceneStore((state) => state.animationTrigger);
+  const { clock } = useThree();
+  const startTimeRef = useRef(0);
 
   useEffect(() => {
-    return () => {
-      clonedTexture.dispose();
-      useLoader.clear(THREE.TextureLoader, url);
-    };
-  }, [clonedTexture, url]);
+    startTimeRef.current = clock.getElapsedTime();
+  }, [animationTemplate, animationTrigger, clock]);
 
-  return (
-    <mesh position={[0, height / 2, 0]} rotation={[0, Math.PI, 0]}>
-      {/* Cylindre avec un rayon ajusté pour être parfaitement plaqué (radius * 1.002) */}
-      {/* On définit une zone imprimable partielle (thetaLength) pour ne pas couvrir l'anse */}
-      {/* On centre la zone imprimable à l'opposé de l'anse (qui est souvent en Z+ ou X+) */}
-      <cylinderGeometry
-        args={[
-          radius * PRINT_LAYER_RADIUS_SCALE, // Rayon extérieur (plaque)
-          radius * PRINT_LAYER_RADIUS_SCALE, // Rayon intérieur (vide)
-          height * PRINT_LAYER_HEIGHT_SCALE, // Hauteur totale (95% de la tasse)
-          64, // Nombre de segments horizontaux (64 pour une bonne qualité)
-          1, // Nombre de segments verticaux (1 car on ne découpe pas verticalement)
-          true,
-          Math.PI * (GAP / 2), // thetaStart : Décalage de ~18° (moitié du vide)
-          Math.PI * (2 - GAP), // thetaLength : ~324° de zone imprimable (laisse ~36° pour l'anse)
-        ]}
-      />
-      <meshStandardMaterial
-        map={clonedTexture}
-        transparent
-        side={THREE.DoubleSide}
-        roughness={0.2}
-        metalness={0.1}
-        depthWrite={true}
-        polygonOffset={true}
-        polygonOffsetFactor={-1} // Aide à éviter le z-fighting même si on est très proche
-      />
-    </mesh>
-  );
-}
+  const [rotation, setRotation] = useState(0);
 
-function MugWithPrint() {
-  const { scene } = useGLTF("/models/mug/scene.gltf");
-  const textureUrl = useTextureStore((state) => state.textureUrl);
-  const mugColor = useSceneStore((state) => state.mugColor);
+  useFrame(({ clock }) => {
+    if (animationTemplate === "mug-rotation") {
+      const config = ANIMATION_CONFIG["mug-rotation"];
+      const duration = config.durationInSeconds;
+      const time = clock.getElapsedTime();
+      const elapsed = time - startTimeRef.current;
+      const progress = (elapsed % duration) / duration;
+      setRotation(progress * Math.PI * 2);
+    } else {
+      // Always reset to 0 if not mug-rotation, but avoid infinite loop if already 0
+      if (rotation !== 0) setRotation(0);
+    }
+  });
 
-  // Calculs géométriques
-  const { height, radius, scale, yOffset } = useMemo(() => {
-    const box = new THREE.Box3().setFromObject(scene);
-    const size = new THREE.Vector3();
-    box.getSize(size);
-
-    // AUGMENTATION DE LA TAILLE (TARGET_HEIGHT passe de 2.0 à 3.5)
-    const TARGET_HEIGHT = 3.5;
-    const scaleFactor = TARGET_HEIGHT / size.y;
-
-    // Rayon estimé (le plus petit côté pour exclure l'anse)
-    const estimatedBodyRadius = (Math.min(size.x, size.z) / 2) * scaleFactor;
-    const bottomOffset = -box.min.y * scaleFactor;
-
-    return {
-      height: size.y * scaleFactor,
-      radius: estimatedBodyRadius,
-      scale: scaleFactor,
-      yOffset: bottomOffset,
-    };
-  }, [scene]);
-
-  useEffect(() => {
-    // Debug: Log model structure for Epic 2 preparation
-    // console.group("Mug Model Structure");
-    scene.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh) {
-        const mesh = child as THREE.Mesh;
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-
-        // Clone material to ensure we can modify it independently
-        if (!Array.isArray(mesh.material)) {
-          mesh.material = mesh.material.clone();
-        }
-
-        console.log("Mesh found:", child.name, "Material:", mesh.material);
-      }
-    });
-    console.groupEnd();
-  }, [scene]);
-
-  // Apply colors
-  useEffect(() => {
-    scene.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh) {
-        const mesh = child as THREE.Mesh;
-
-        if (!Array.isArray(mesh.material)) {
-          const material = mesh.material as THREE.MeshStandardMaterial;
-
-          // Apply color to Material.001 as requested
-          if (material.name === "Material.001") {
-            material.color.set(mugColor);
-          }
-        }
-      }
-    });
-  }, [scene, mugColor]);
-
-  return (
-    <group>
-      <primitive
-        object={scene}
-        scale={[scale, scale, scale]}
-        position={[0, yOffset, 0]}
-      />
-
-      {textureUrl && (
-        <Suspense fallback={null}>
-          <PrintLayer url={textureUrl} radius={radius} height={height} />
-        </Suspense>
-      )}
-    </group>
-  );
-}
-
-function SceneContent() {
-  const showGrid = useSceneStore((state) => state.showGrid);
-  const backgroundColor = useSceneStore((state) => state.backgroundColor);
-
-  return (
-    <>
-      <color attach="background" args={[backgroundColor]} />
-
-      <group position={[0, -2, 0]}>
-        <Suspense fallback={null}>
-          <MugWithPrint />
-          <Environment preset="studio" />
-        </Suspense>
-      </group>
-
-      {showGrid && (
-        <group position={[0, -2, 0]}>
-          <Grid
-            infiniteGrid
-            fadeDistance={50}
-            fadeStrength={5}
-            cellThickness={1}
-            sectionThickness={1.5}
-            cellSize={1}
-            sectionSize={5}
-            position={[0, 0, 0]}
-            cellColor="#9ca3af"
-            sectionColor="#4b5563"
-          />
-          {/* ContactShadows : Ombre dynamique générée par la forme de l'objet (plus réaliste qu'un simple cercle) */}
-          <ContactShadows
-            position={[0, 0.01, 0]}
-            opacity={0.4}
-            scale={10}
-            blur={2}
-            far={4}
-            color="#000000"
-          />
-        </group>
-      )}
-    </>
-  );
+  return <>{children(rotation)}</>;
 }
 
 export default function MugScene() {
@@ -325,15 +317,10 @@ export default function MugScene() {
         gl={{ antialias: true }}
         dpr={[1, 2]}
       >
-        <ambientLight intensity={0.5} />
-        <directionalLight
-          position={[5, 5, 5]}
-          intensity={1}
-          castShadow
-          shadow-mapSize={[1024, 1024]}
-        />
-
-        <SceneContent />
+        <MugLights />
+        <MugRotationController>
+          {(rotation) => <MugContent mugRotation={rotation} />}
+        </MugRotationController>
         <SceneController />
       </Canvas>
     </div>
