@@ -6,6 +6,7 @@ import { TemplateSelector } from "@/components/TemplateSelector";
 import { TextureUploader } from "@/components/dropzone/TextureUploader";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ExportOverlay } from "@/components/video/ExportOverlay";
 import { cn } from "@/lib/utils";
 import { CameraView, SCENE_COLORS, useSceneStore } from "@/store/useSceneStore";
 import { useTextureStore } from "@/store/useTextureStore";
@@ -19,6 +20,7 @@ import {
   ChevronUp,
   Download,
   Film,
+  Loader2,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 
@@ -48,6 +50,12 @@ const VideoPreview = dynamic(
       </div>
     ),
   },
+);
+
+const VideoExporter = dynamic(
+  () =>
+    import("@/components/video/VideoExporter").then((mod) => mod.VideoExporter),
+  { ssr: false },
 );
 
 function LandingView() {
@@ -119,7 +127,8 @@ function EditorView() {
     toggleGrid,
     isVideoPreviewOpen,
     setIsVideoPreviewOpen,
-    animationTemplate,
+    isExporting,
+    triggerExport,
   } = useSceneStore();
 
   const handleViewSelect = (view: CameraView) => {
@@ -208,9 +217,18 @@ function EditorView() {
             )}
             {isVideoPreviewOpen ? "Vidéo" : "Scène 3D"}
           </Button>
-          <Button variant="default" className="gap-2">
-            <Download className="size-4" />
-            Exporter
+          <Button
+            variant="default"
+            className="gap-2"
+            onClick={triggerExport}
+            disabled={isExporting}
+          >
+            {isExporting ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Download className="size-4" />
+            )}
+            {isExporting ? "Export..." : "Exporter"}
           </Button>
         </div>
       </header>
@@ -412,6 +430,9 @@ function EditorView() {
           </div>
         </div>
       </div>
+      {/* Video Exporter - Handles export logic and rendering */}
+      <VideoExporter />
+      <ExportOverlay />
     </main>
   );
 }

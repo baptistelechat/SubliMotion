@@ -13,10 +13,13 @@ import {
 import * as THREE from "three";
 import { MugContent, MugLights } from "../scene/MugContent";
 
-function VideoCamera() {
+interface VideoCameraProps {
+  frame: number;
+  durationInFrames: number;
+}
+
+export function VideoCamera({ frame, durationInFrames }: VideoCameraProps) {
   const { camera } = useThree();
-  const frame = useCurrentFrame();
-  const { durationInFrames } = useVideoConfig();
   const animationTemplate = useSceneStore((state) => state.animationTemplate);
 
   useFrame(() => {
@@ -206,7 +209,7 @@ export const MugVideo = () => {
       >
         <MugLights />
         <MugContent mugRotation={mugRotation} />
-        <VideoCamera />
+        <VideoCamera frame={frame} durationInFrames={durationInFrames} />
       </ThreeCanvas>
     </AbsoluteFill>
   );

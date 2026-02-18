@@ -15,19 +15,19 @@ export const VideoPreview = () => {
     (state) => state.setIsVideoPreviewOpen,
   );
   const isVideoPlaying = useSceneStore((state) => state.isVideoPlaying);
-  const setIsVideoPlaying = useSceneStore((state) => state.setIsVideoPlaying);
+  const isExporting = useSceneStore((state) => state.isExporting);
   const playerRef = useRef<PlayerRef>(null);
 
   // Sync state with player
   useEffect(() => {
     if (!playerRef.current) return;
 
-    if (isVideoPlaying && isVideoPreviewOpen) {
+    if (isVideoPlaying && isVideoPreviewOpen && !isExporting) {
       playerRef.current.play();
     } else {
       playerRef.current.pause();
     }
-  }, [isVideoPlaying, isVideoPreviewOpen]);
+  }, [isVideoPlaying, isVideoPreviewOpen, isExporting]);
 
   if (!animationTemplate) {
     return (
@@ -59,7 +59,7 @@ export const VideoPreview = () => {
     : VIDEO_CONFIG.DURATION_IN_SECONDS_DEFAULT * VIDEO_CONFIG.FPS;
 
   return (
-    <div className="w-full h-full bg-gray-100 flex items-center justify-center p-10">
+    <div className="w-full h-full bg-gray-100 flex flex-col items-center justify-center p-10 relative">
       <Player
         ref={playerRef}
         component={MugVideo}

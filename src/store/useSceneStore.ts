@@ -67,6 +67,14 @@ interface SceneState {
   setIsVideoPreviewOpen: (isOpen: boolean) => void;
   isVideoPlaying: boolean;
   setIsVideoPlaying: (isPlaying: boolean) => void;
+
+  // Export
+  isExporting: boolean;
+  setIsExporting: (isExporting: boolean) => void;
+  exportProgress: number;
+  setExportProgress: (progress: number) => void;
+  startExportTrigger: number;
+  triggerExport: () => void;
 }
 
 export const useSceneStore = create<SceneState>((set) => ({
@@ -107,6 +115,15 @@ export const useSceneStore = create<SceneState>((set) => ({
 
   isVideoPreviewOpen: false,
   setIsVideoPreviewOpen: (isOpen) => set({ isVideoPreviewOpen: isOpen }),
-  isVideoPlaying: true,
+
+  isVideoPlaying: false,
   setIsVideoPlaying: (isPlaying) => set({ isVideoPlaying: isPlaying }),
+
+  // Export
+  isExporting: false,
+  setIsExporting: (isExporting) => set({ isExporting }),
+  exportProgress: 0,
+  setExportProgress: (progress) => set({ exportProgress: progress }),
+  startExportTrigger: 0,
+  triggerExport: () => set((state) => ({ startExportTrigger: state.startExportTrigger + 1 })),
 }));
