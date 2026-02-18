@@ -1,5 +1,6 @@
 "use client";
 
+import { ASSETS } from "@/config/assets";
 import { useSceneStore } from "@/store/useSceneStore";
 import { useTextureStore } from "@/store/useTextureStore";
 import { ContactShadows, Environment, Grid, useGLTF } from "@react-three/drei";
@@ -8,7 +9,7 @@ import { Suspense, useEffect, useMemo } from "react";
 import * as THREE from "three";
 
 // Preload pour éviter le waterfall
-useGLTF.preload("/models/mug/scene.gltf");
+useGLTF.preload(ASSETS.MODELS.MUG);
 
 const GAP = 0.27;
 const PRINT_LAYER_RADIUS_SCALE = 1.002;
@@ -73,7 +74,7 @@ function PrintLayer({
 }
 
 function MugWithPrint() {
-  const { scene: originalScene } = useGLTF("/models/mug/scene.gltf");
+  const { scene: originalScene } = useGLTF(ASSETS.MODELS.MUG);
   const scene = useMemo(() => {
     // Clone the scene to ensure each instance (Editor vs Preview) has its own scene graph
     const cloned = originalScene.clone();

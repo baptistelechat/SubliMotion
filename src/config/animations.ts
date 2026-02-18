@@ -48,6 +48,15 @@ export const ANIMATION_TEMPLATES: Record<
   },
 } as const;
 
+export const VIDEO_CONFIG = {
+  FPS: 30,
+  WIDTH: 1080,
+  HEIGHT: 1920,
+  DURATION_IN_SECONDS_DEFAULT: 5,
+};
+
+export const DEFAULT_TARGET = new THREE.Vector3(0, -0.25, 0);
+
 export const ANIMATION_CONFIG: Record<
   AnimationTemplate,
   {
@@ -61,35 +70,35 @@ export const ANIMATION_CONFIG: Record<
     durationInSeconds: 3, // Faster than 5s
     cameraStart: new THREE.Vector3(0, 2, 20),
     cameraEnd: new THREE.Vector3(6, 4, 7),
-    target: new THREE.Vector3(0, -0.25, 0),
+    target: DEFAULT_TARGET,
   },
   "mug-rotation": {
     durationInSeconds: 5, // Keep at 5s
     cameraStart: new THREE.Vector3(6, 4, 7),
-    target: new THREE.Vector3(0, -0.25, 0),
+    target: DEFAULT_TARGET,
   },
   "camera-rotation": {
     durationInSeconds: 5, // Keep at 5s
     cameraStart: new THREE.Vector3(6, 4, 7),
-    target: new THREE.Vector3(0, -0.25, 0),
+    target: DEFAULT_TARGET,
   },
   "vertical-reveal": {
     durationInSeconds: 3, // Faster than 5s
     cameraStart: new THREE.Vector3(0, -8, 4),
     cameraEnd: new THREE.Vector3(0, 1.5, 8),
-    target: new THREE.Vector3(0, -0.25, 0),
+    target: DEFAULT_TARGET,
   },
   "horizontal-reveal": {
     durationInSeconds: 3, // Faster than 5s
     cameraStart: new THREE.Vector3(-12, 1.5, 0),
     cameraEnd: new THREE.Vector3(0, 1.5, 8),
-    target: new THREE.Vector3(0, -0.25, 0),
+    target: DEFAULT_TARGET,
   },
   "zoom-out": {
     durationInSeconds: 3,
     cameraStart: new THREE.Vector3(6, 4, 7), // Inverse of zoom-in end
     cameraEnd: new THREE.Vector3(0, 2, 20), // Inverse of zoom-in start
-    target: new THREE.Vector3(0, -0.25, 0),
+    target: DEFAULT_TARGET,
   },
   "spiral-up": {
     durationInSeconds: 6,

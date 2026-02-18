@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ANIMATION_CONFIG } from "@/config/animations";
+import { ANIMATION_CONFIG, VIDEO_CONFIG } from "@/config/animations";
 import { useSceneStore } from "@/store/useSceneStore";
 import { Player, type PlayerRef } from "@remotion/player";
 import { Film } from "lucide-react";
@@ -53,12 +53,10 @@ export const VideoPreview = () => {
 
   const config = ANIMATION_CONFIG[animationTemplate];
 
-  const FPS = 30;
-  const WIDTH = 1080;
-  const HEIGHT = 1920;
-
-  // Use config duration or fallback to 5 seconds
-  const DURATION_IN_FRAMES = config ? config.durationInSeconds * FPS : 150;
+  // Use config duration or fallback to default
+  const DURATION_IN_FRAMES = config
+    ? config.durationInSeconds * VIDEO_CONFIG.FPS
+    : VIDEO_CONFIG.DURATION_IN_SECONDS_DEFAULT * VIDEO_CONFIG.FPS;
 
   return (
     <div className="w-full h-full bg-gray-100 flex items-center justify-center p-10">
@@ -66,9 +64,9 @@ export const VideoPreview = () => {
         ref={playerRef}
         component={MugVideo}
         durationInFrames={DURATION_IN_FRAMES}
-        fps={FPS}
-        compositionWidth={WIDTH}
-        compositionHeight={HEIGHT}
+        fps={VIDEO_CONFIG.FPS}
+        compositionWidth={VIDEO_CONFIG.WIDTH}
+        compositionHeight={VIDEO_CONFIG.HEIGHT}
         style={{
           height: "100%",
           aspectRatio: "9/16",

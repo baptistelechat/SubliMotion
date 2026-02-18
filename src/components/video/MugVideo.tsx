@@ -1,6 +1,6 @@
 "use client";
 
-import { ANIMATION_CONFIG } from "@/config/animations";
+import { ANIMATION_CONFIG, DEFAULT_TARGET } from "@/config/animations";
 import { useSceneStore } from "@/store/useSceneStore";
 import { useFrame, useThree } from "@react-three/fiber";
 import { ThreeCanvas } from "@remotion/three";
@@ -13,8 +13,6 @@ import {
 import * as THREE from "three";
 import { MugContent, MugLights } from "../scene/MugContent";
 
-const TARGET = new THREE.Vector3(0, -0.25, 0);
-
 function VideoCamera() {
   const { camera } = useThree();
   const frame = useCurrentFrame();
@@ -23,6 +21,15 @@ function VideoCamera() {
 
   useFrame(() => {
     if (!animationTemplate) return;
+
+    // Type guard to ensure animationTemplate is a valid key in ANIMATION_CONFIG
+    if (!(animationTemplate in ANIMATION_CONFIG)) {
+      console.warn(
+        `Animation template "${animationTemplate}" not found in config.`,
+      );
+      return;
+    }
+
     const config =
       ANIMATION_CONFIG[animationTemplate as keyof typeof ANIMATION_CONFIG];
     if (!config) return;
@@ -166,7 +173,7 @@ function VideoCamera() {
       default:
         // Default static view (iso1)
         camera.position.set(6, 4, 7);
-        camera.lookAt(TARGET);
+        camera.lookAt(DEFAULT_TARGET);
     }
   });
 
