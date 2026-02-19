@@ -64,7 +64,7 @@ const SocialPackExporter = dynamic(
 
 function LandingView() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-background text-foreground p-4 relative">
+    <main className="flex min-h-dvh flex-col items-center justify-center bg-background text-foreground p-4 relative">
       <div className="max-w-3xl w-full space-y-8 text-center">
         <div className="space-y-2">
           <h1 className="text-4xl md:text-6xl font-bold bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent">
@@ -94,20 +94,20 @@ function LandingView() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto pt-8">
-          <div className="p-4 bg-muted/30 rounded-lg">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
+          <div className="p-4 bg-muted border rounded-lg">
             <div className="font-semibold mb-1">1. Importez</div>
             <p className="text-sm text-muted-foreground">
               Glissez votre image (JPG/PNG)
             </p>
           </div>
-          <div className="p-4 bg-muted/30 rounded-lg">
+          <div className="p-4 bg-muted border rounded-lg">
             <div className="font-semibold mb-1">2. Visualisez</div>
             <p className="text-sm text-muted-foreground">
               Aperçu 3D interactif immédiat
             </p>
           </div>
-          <div className="p-4 bg-muted/30 rounded-lg">
+          <div className="p-4 bg-muted border rounded-lg">
             <div className="font-semibold mb-1">3. Exportez</div>
             <p className="text-sm text-muted-foreground">
               Téléchargez votre pack visuel
@@ -189,7 +189,7 @@ function EditorView() {
   ];
 
   return (
-    <main className="flex h-screen overflow-hidden flex-col bg-background text-foreground relative">
+    <main className="flex h-dvh overflow-hidden flex-col bg-background text-foreground relative">
       <MobileBlocker />
       <div
         className={cn(
@@ -245,7 +245,7 @@ function EditorView() {
         </header>
 
         {/* Editor Layout: Left (Tools) - Center (3D) - Right (Views) */}
-        <div className="flex-1 flex flex-col md:flex-row h-[calc(100vh-64px)] overflow-hidden">
+        <div className="flex-1 flex flex-col md:flex-row h-[calc(100dvh-64px)] overflow-hidden">
           {/* Left Panel: Tools */}
           <ScrollArea className="w-full md:w-80 border-r bg-card/50 h-full">
             <div className="p-4 flex flex-col gap-6">

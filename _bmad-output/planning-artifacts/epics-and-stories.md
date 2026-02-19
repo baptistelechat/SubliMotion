@@ -90,7 +90,7 @@ Based on PRD v1.0
 - [x] Une liste de hashtags pertinents est affichée.
 - [x] Bouton "Copier" pour récupérer le texte facilement.
 
-## Épopée 4 : Mobile Experience (Future)
+<!-- ## Épopée 4 : Mobile Experience (Future)
 
 ### US 4.1 - Responsive Editor UI
 
@@ -98,4 +98,4 @@ Based on PRD v1.0
 **Acceptance Criteria:**
 
 - [ ] Les panneaux d'outils sont accessibles sans masquer la vue 3D.
-- [ ] Les contrôles tactiles sont fluides.
+- [ ] Les contrôles tactiles sont fluides. -->
