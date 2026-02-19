@@ -1,7 +1,12 @@
 "use client";
 
-import { ANIMATION_CONFIG, VIDEO_CONFIG } from "@/config/animations";
-import { CameraView, useSceneStore } from "@/store/useSceneStore";
+import {
+  ANIMATION_CONFIG,
+  AnimationTemplate,
+  IMAGE_CONFIG,
+  VIDEO_CONFIG,
+} from "@/config/animations";
+import { CAMERA_VIEWS, CameraView, useSceneStore } from "@/store/useSceneStore";
 import { Canvas, useThree } from "@react-three/fiber";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
@@ -12,6 +17,11 @@ import { toast } from "sonner";
 import * as THREE from "three";
 import { MugContent, MugLights } from "../scene/MugContent";
 import { VideoCamera } from "./MugVideo";
+import { CAMERA_CONFIGS } from "@/config/camera";
+
+type ExportTask =
+  | { type: "image"; name: CameraView }
+  | { type: "video"; name: AnimationTemplate; duration?: number };
 
 // Internal component to handle scene updates and capturing
 function ExporterScene({
@@ -62,17 +72,11 @@ export function SocialPackExporter() {
   // const animationTemplate = useSceneStore((state) => state.animationTemplate);
 
   const [currentFrame, setCurrentFrame] = useState(0);
-  const [currentTask, setCurrentTask] = useState<{
-    type: "image" | "video";
-    name: string;
-    duration?: number;
-  } | null>(null);
+  const [currentTask, setCurrentTask] = useState<ExportTask | null>(null);
 
   // Export context
   const zipRef = useRef<JSZip | null>(null);
-  const taskQueueRef = useRef<
-    Array<{ type: "image" | "video"; name: string; duration?: number }>
-  >([]);
+  const taskQueueRef = useRef<ExportTask[]>([]);
   const exportContext = useRef<{
     muxer: Muxer.Muxer<Muxer.ArrayBufferTarget>;
     videoEncoder: VideoEncoder;
@@ -80,8 +84,12 @@ export function SocialPackExporter() {
   } | null>(null);
 
   const fps = VIDEO_CONFIG.FPS;
-  const width = 1080;
-  const height = 1080; // Square for social media
+
+  // Determine dimensions based on task type
+  const width =
+    currentTask?.type === "image" ? IMAGE_CONFIG.WIDTH : VIDEO_CONFIG.WIDTH;
+  const height =
+    currentTask?.type === "image" ? IMAGE_CONFIG.HEIGHT : VIDEO_CONFIG.HEIGHT;
 
   // Helper to start the next task
   const processNextTask = useCallback(async () => {
@@ -107,17 +115,19 @@ export function SocialPackExporter() {
 
       // Reset scene
       setAnimationTemplate(null);
-      setCameraView("front");
+      setCameraView("iso1");
       return;
     }
 
     const nextTask = taskQueueRef.current.shift();
+    if (!nextTask) return;
+
     setCurrentTask(nextTask);
 
     if (nextTask.type === "image") {
       setSocialPackStatus(`Génération de l'image : ${nextTask.name}...`);
       setAnimationTemplate(null);
-      setCameraView(nextTask.name as CameraView);
+      setCameraView(nextTask.name);
       // Wait a bit for camera to settle (even though we set it directly)
       // The render loop will trigger capture
       setCurrentFrame(0); // Trigger render
@@ -131,8 +141,8 @@ export function SocialPackExporter() {
         target: new Muxer.ArrayBufferTarget(),
         video: {
           codec: "avc",
-          width,
-          height,
+          width: VIDEO_CONFIG.WIDTH,
+          height: VIDEO_CONFIG.HEIGHT,
         },
         fastStart: "in-memory",
       });
@@ -144,8 +154,8 @@ export function SocialPackExporter() {
 
       videoEncoder.configure({
         codec: "avc1.4d002a",
-        width,
-        height,
+        width: VIDEO_CONFIG.WIDTH,
+        height: VIDEO_CONFIG.HEIGHT,
         bitrate: 5_000_000,
         framerate: fps,
       });
@@ -169,24 +179,10 @@ export function SocialPackExporter() {
       zipRef.current = new JSZip();
 
       // Build task queue
-      const tasks: Array<{
-        type: "image" | "video";
-        name: string;
-        duration?: number;
-      }> = [];
+      const tasks: ExportTask[] = [];
 
       // Images
-      const views: CameraView[] = [
-        "front",
-        "back",
-        "left",
-        "right",
-        "iso1",
-        "iso2",
-        "iso3",
-        "iso4",
-      ];
-      views.forEach((view) => {
+      CAMERA_VIEWS.forEach((view) => {
         tasks.push({ type: "image", name: view });
       });
 
@@ -196,7 +192,7 @@ export function SocialPackExporter() {
       Object.keys(ANIMATION_CONFIG).forEach((anim) => {
         tasks.push({
           type: "video",
-          name: anim,
+          name: anim as AnimationTemplate,
           duration:
             ANIMATION_CONFIG[anim as keyof typeof ANIMATION_CONFIG]
               .durationInSeconds * fps,
@@ -314,7 +310,8 @@ export function SocialPackExporter() {
   }
 
   // Calculate duration for Camera
-  const durationInFrames = currentTask?.duration || 150;
+  const durationInFrames =
+    currentTask?.type === "video" ? currentTask.duration || 150 : 150;
 
   return (
     <div
@@ -336,7 +333,7 @@ export function SocialPackExporter() {
         }}
         dpr={1}
         shadows
-        style={{ width: `${width}px`, height: `${height}px` }}
+        style={{ width: width, height: height }}
         camera={{ position: [6, 4, 7], fov: 45, near: 0.1, far: 1000 }}
       >
         <MugLights />
@@ -367,24 +364,9 @@ function StaticCamera({ view }: { view: CameraView }) {
   const { camera } = useThree();
 
   useEffect(() => {
-    // Mapping based on MugScene logic
-    const target: [number, number, number] = [0, -0.25, 0];
-    const positions: Record<string, [number, number, number]> = {
-      front: [0, 1.5, 8],
-      back: [0, 1.5, -8],
-      left: [-8, 1.5, 0],
-      right: [8, 1.5, 0],
-      top: [0.01, 10, 0],
-      bottom: [0.01, -10, 0],
-      iso1: [6, 4, 7],
-      iso2: [-6, 4, 7],
-      iso3: [6, 4, -7],
-      iso4: [-6, 4, -7],
-    };
-
-    const pos = positions[view] || [0, 1.5, 8];
-    camera.position.set(pos[0], pos[1], pos[2]);
-    camera.lookAt(...target);
+    const config = CAMERA_CONFIGS[view];
+    camera.position.set(config.pos[0], config.pos[1], config.pos[2]);
+    camera.lookAt(...config.target);
   }, [view, camera]);
 
   return null;

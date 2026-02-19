@@ -1,6 +1,7 @@
 "use client";
 
 import { ANIMATION_CONFIG } from "@/config/animations";
+import { CAMERA_CONFIGS } from "@/config/camera";
 import { useSceneStore } from "@/store/useSceneStore";
 import { CameraControls, useGLTF } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
@@ -50,27 +51,7 @@ function SceneController() {
   useEffect(() => {
     if (!controlsRef.current || !cameraView) return;
 
-    const target: [number, number, number] = [0, -0.25, 0];
-
-    const viewConfigs: Record<
-      string,
-      { pos: [number, number, number]; target: [number, number, number] }
-    > = {
-      front: { pos: [0, 1.5, 8], target },
-      back: { pos: [0, 1.5, -8], target },
-      left: { pos: [-8, 1.5, 0], target },
-      right: { pos: [8, 1.5, 0], target },
-      top: { pos: [0.01, 10, 0], target }, // Epsilon to avoid gimbal lock
-      bottom: { pos: [0.01, -10, 0], target },
-      iso1: { pos: [6, 4, 7], target },
-      iso2: { pos: [-6, 4, 7], target },
-      iso3: { pos: [6, 4, -7], target },
-      iso4: { pos: [-6, 4, -7], target },
-    };
-
-    if (!cameraView) return;
-
-    const config = viewConfigs[cameraView];
+    const config = CAMERA_CONFIGS[cameraView];
 
     controlsRef.current.setLookAt(
       ...config.pos,

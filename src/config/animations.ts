@@ -55,6 +55,11 @@ export const VIDEO_CONFIG = {
   DURATION_IN_SECONDS_DEFAULT: 5,
 };
 
+export const IMAGE_CONFIG = {
+  WIDTH: 1080,
+  HEIGHT: 1080,
+};
+
 export const DEFAULT_TARGET = new THREE.Vector3(0, -0.25, 0);
 
 export const ANIMATION_CONFIG: Record<

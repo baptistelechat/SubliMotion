@@ -78,6 +78,7 @@ export const VideoPreview = () => {
         controls
         loop
         autoPlay={false}
+        acknowledgeRemotionLicense
       />
     </div>
   );

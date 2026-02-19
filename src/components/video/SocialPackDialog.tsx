@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { IMAGE_CONFIG, VIDEO_CONFIG } from "@/config/animations";
 import { SOCIAL_PACK_CONFIG } from "@/config/social-pack";
 import { useSceneStore } from "@/store/useSceneStore";
 import {
@@ -105,7 +106,7 @@ export function SocialPackDialog() {
         <div className="flex flex-col gap-4 py-4">
           <div className="relative rounded-md border p-4 bg-muted/50 font-mono text-sm whitespace-pre-wrap">
             {fullText}
-            <div className="absolute top-2 right-2 flex gap-1">
+            <div className="absolute bottom-0.5 right-0.5 flex gap-0.5">
               <Button
                 size="icon"
                 variant="ghost"
@@ -136,8 +137,8 @@ export function SocialPackDialog() {
           <div className="flex flex-col gap-2">
             <h4 className="text-sm font-medium">Contenu du Pack (ZIP)</h4>
             <ul className="text-xs text-muted-foreground list-disc pl-4 space-y-1">
-              <li>Toutes les animations vidéo (Format Carré 1080x1080)</li>
-              <li>Images de toutes les vues caméra (Format Carré 1080x1080)</li>
+              <li>{`Toutes les animations vidéo (Format Carré ${VIDEO_CONFIG.WIDTH}x${VIDEO_CONFIG.HEIGHT} - ${VIDEO_CONFIG.FPS}fps)`}</li>
+              <li>{`Images de toutes les vues caméra (Format Carré ${IMAGE_CONFIG.WIDTH}x${IMAGE_CONFIG.HEIGHT})`}</li>
               <li>Fichier texte avec légendes et hashtags</li>
             </ul>
           </div>

@@ -1,17 +1,8 @@
 import { AnimationTemplate } from "@/config/animations";
+import { CAMERA_VIEWS, CameraView } from "@/config/camera";
 import { create } from "zustand";
 
-export type CameraView =
-  | "front"
-  | "back"
-  | "left"
-  | "right"
-  | "top"
-  | "bottom"
-  | "iso1"
-  | "iso2"
-  | "iso3"
-  | "iso4";
+export { CAMERA_VIEWS, type CameraView };
 export type BackgroundType = "color" | "environment";
 
 export { type AnimationTemplate };
