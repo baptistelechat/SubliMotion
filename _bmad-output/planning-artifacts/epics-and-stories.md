@@ -67,28 +67,28 @@ Based on PRD v1.0
 **Description:** L'utilisateur peut jouer l'animation sélectionnée dans le navigateur avant l'export.
 **Acceptance Criteria:**
 
-- [ ] Bouton "Play" pour lancer l'animation dans le canvas.
-- [ ] L'animation correspond au template sélectionné.
-- [ ] Possibilité de mettre en pause ou de relancer.
+- [x] Bouton "Play" pour lancer l'animation dans le canvas.
+- [x] L'animation correspond au template sélectionné.
+- [x] Possibilité de mettre en pause ou de relancer.
 
 ### US 3.2 - Export MP4
 
 **Description:** L'application génère un fichier vidéo MP4 téléchargeable (1080x1920 pour Reels) via l'enregistrement client-side.
 **Acceptance Criteria:**
 
-- [ ] Bouton "Exporter" ou "Générer Reel".
-- [ ] La vidéo est générée au format MP4.
-- [ ] La résolution est de 1080x1920 (format vertical 9:16).
-- [ ] Le fichier est téléchargé automatiquement à la fin du processus.
+- [x] Bouton "Exporter" ou "Générer Reel".
+- [x] La vidéo est générée au format MP4.
+- [x] La résolution est de 1080x1920 (format vertical 9:16).
+- [x] Le fichier est téléchargé automatiquement à la fin du processus.
 
 ### US 3.3 - Export Social Pack
 
 **Description:** L'application fournit un texte de légende et des hashtags suggérés à copier-coller.
 **Acceptance Criteria:**
 
-- [ ] Une zone de texte affiche une suggestion de légende.
-- [ ] Une liste de hashtags pertinents est affichée.
-- [ ] Bouton "Copier" pour récupérer le texte facilement.
+- [x] Une zone de texte affiche une suggestion de légende.
+- [x] Une liste de hashtags pertinents est affichée.
+- [x] Bouton "Copier" pour récupérer le texte facilement.
 
 ## Épopée 4 : Mobile Experience (Future)
 
