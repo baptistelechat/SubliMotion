@@ -269,7 +269,7 @@ function EditorView() {
                 <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
                   Fond
                 </h2>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-5 gap-2">
                   {backgrounds.map((bg) => (
                     <button
                       key={bg.value}
@@ -296,6 +296,39 @@ function EditorView() {
                       />
                     </button>
                   ))}
+
+                  <div
+                    className={cn(
+                      "relative w-full aspect-square rounded-md border overflow-hidden transition-all group",
+                      !(Object.values(SCENE_COLORS) as string[]).includes(
+                        backgroundColor,
+                      ) && "ring-2 ring-primary ring-offset-2",
+                    )}
+                    title="Couleur personnalisée"
+                  >
+                    <div
+                      className="absolute inset-0 bg-linear-to-br from-red-500 via-green-500 to-blue-500 opacity-50 group-hover:opacity-100 transition-opacity"
+                      style={
+                        !(Object.values(SCENE_COLORS) as string[]).includes(
+                          backgroundColor,
+                        )
+                          ? { background: backgroundColor, opacity: 1 }
+                          : {}
+                      }
+                    />
+                    <input
+                      type="color"
+                      value={
+                        !(Object.values(SCENE_COLORS) as string[]).includes(
+                          backgroundColor,
+                        )
+                          ? backgroundColor
+                          : "#ffffff"
+                      }
+                      onChange={(e) => setBackgroundColor(e.target.value)}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                  </div>
                 </div>
               </div>
 

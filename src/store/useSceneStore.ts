@@ -24,7 +24,7 @@ export const MUG_COLORS = {
   Vert: "#22c55e",
 } as const;
 
-export type SceneColor = (typeof SCENE_COLORS)[keyof typeof SCENE_COLORS];
+export type SceneColor = string;
 
 interface SceneState {
   // Background

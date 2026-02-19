@@ -281,6 +281,7 @@ export function VideoCamera({ frame, durationInFrames }: VideoCameraProps) {
 export const MugVideo = () => {
   const { width, height } = useVideoConfig();
   const animationTemplate = useSceneStore((state) => state.animationTemplate);
+  const backgroundColor = useSceneStore((state) => state.backgroundColor);
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
 
@@ -293,7 +294,7 @@ export const MugVideo = () => {
       : 0;
 
   return (
-    <AbsoluteFill>
+    <AbsoluteFill style={{ backgroundColor }}>
       <ThreeCanvas
         width={width}
         height={height}

@@ -390,8 +390,13 @@ function MugRotationController({
 }
 
 export default function MugScene() {
+  const backgroundColor = useSceneStore((state) => state.backgroundColor);
+
   return (
-    <div className="w-full h-full min-h-125 bg-gray-100 relative">
+    <div
+      className="w-full h-full min-h-125 relative transition-colors duration-300"
+      style={{ backgroundColor }}
+    >
       <Canvas
         shadows
         camera={{ position: [6, 4, 7], fov: 45 }}
