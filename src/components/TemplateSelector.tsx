@@ -10,6 +10,7 @@ import {
   Pause,
   Play,
   RotateCw,
+  Sparkles,
   Tornado,
   Zap,
   ZoomIn,
@@ -26,6 +27,7 @@ const TEMPLATE_ICONS: Record<AnimationTemplate, LucideIcon> = {
   "horizontal-reveal": ArrowRightFromLine,
   "spiral-up": Tornado,
   "dramatic-zoom": Zap,
+  "complete-showcase": Sparkles,
 };
 
 export function TemplateSelector() {

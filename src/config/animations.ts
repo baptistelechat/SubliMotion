@@ -8,7 +8,8 @@ export type AnimationTemplate =
   | "vertical-reveal"
   | "horizontal-reveal"
   | "spiral-up"
-  | "dramatic-zoom";
+  | "dramatic-zoom"
+  | "complete-showcase";
 
 export const ANIMATION_TEMPLATES: Record<
   AnimationTemplate,
@@ -46,6 +47,10 @@ export const ANIMATION_TEMPLATES: Record<
     label: "Zoom Dramatique",
     description: "Un zoom rapide suivi d'un ralenti",
   },
+  "complete-showcase": {
+    label: "Présentation Complète",
+    description: "Entrée zoom, spirale de présentation, et sortie zoom out",
+  },
 } as const;
 
 export const VIDEO_CONFIG = {
@@ -72,31 +77,37 @@ export const ANIMATION_CONFIG: Record<
   }
 > = {
   "zoom-in": {
-    durationInSeconds: 3, // Faster than 5s
+    durationInSeconds: 3,
     cameraStart: new THREE.Vector3(0, 2, 20),
     cameraEnd: new THREE.Vector3(6, 4, 7),
     target: DEFAULT_TARGET,
   },
   "mug-rotation": {
-    durationInSeconds: 5, // Keep at 5s
+    durationInSeconds: 10,
     cameraStart: new THREE.Vector3(6, 4, 7),
     target: DEFAULT_TARGET,
   },
   "camera-rotation": {
-    durationInSeconds: 5, // Keep at 5s
+    durationInSeconds: 10,
     cameraStart: new THREE.Vector3(6, 4, 7),
     target: DEFAULT_TARGET,
   },
   "vertical-reveal": {
-    durationInSeconds: 3, // Faster than 5s
+    durationInSeconds: 3,
     cameraStart: new THREE.Vector3(0, -8, 4),
     cameraEnd: new THREE.Vector3(0, 1.5, 8),
     target: DEFAULT_TARGET,
   },
   "horizontal-reveal": {
-    durationInSeconds: 3, // Faster than 5s
+    durationInSeconds: 3,
     cameraStart: new THREE.Vector3(-12, 1.5, 0),
     cameraEnd: new THREE.Vector3(0, 1.5, 8),
+    target: DEFAULT_TARGET,
+  },
+  "complete-showcase": {
+    durationInSeconds: 15,
+    cameraStart: new THREE.Vector3(0, 2, 20), // Matches zoom-in start
+    cameraEnd: new THREE.Vector3(0, 2, 20), // Matches zoom-in start (for loop/reset)
     target: DEFAULT_TARGET,
   },
   "zoom-out": {
@@ -106,7 +117,7 @@ export const ANIMATION_CONFIG: Record<
     target: DEFAULT_TARGET,
   },
   "spiral-up": {
-    durationInSeconds: 6,
+    durationInSeconds: 10,
     cameraStart: new THREE.Vector3(5, 0, 5),
     cameraEnd: new THREE.Vector3(8, 8, 8),
     target: new THREE.Vector3(0, 0, 0),

@@ -174,6 +174,100 @@ export function VideoCamera({ frame, durationInFrames }: VideoCameraProps) {
         break;
       }
 
+      case "complete-showcase": {
+        // Continuous flow animation:
+        // - Global rotation (2 turns for slower pace)
+        // - Variable radius (Slower Zoom In -> Stay -> Slower Zoom Out)
+        // - Variable height (Start Low -> Go High -> Return Low)
+
+        // Timing constants (Smoother transitions)
+        const ZOOM_IN_DURATION = 0.25; // 25% (3.75s)
+        const ZOOM_OUT_START = 0.75; // 75% (Start zoom out at 11.25s)
+
+        // Key metrics
+        const startRadius = 20;
+        const closeRadius = 10;
+        const startHeight = 2; // Initial zoom-in height
+        const lowHeight = 1; // Bottom of the mug (start of spiral)
+        const highHeight = 6; // Top/Above the mug (end of spiral)
+        const totalRotations = 2; // 2 full turns
+
+        // Start from Zoom-in start position
+        const startPos = new THREE.Vector3(0, 2, 20);
+
+        // Calculate current angle (Continuous rotation)
+        // Start from -PI/2 (front view relative to Z)
+        const initialAngle = Math.atan2(
+          startPos.z - config.target.z,
+          startPos.x - config.target.x,
+        );
+        const currentAngle =
+          initialAngle - progress * totalRotations * Math.PI * 2;
+
+        // Calculate current radius (Distance from center)
+        let currentRadius = closeRadius;
+        if (progress < ZOOM_IN_DURATION) {
+          // Zoom In Phase
+          const p = progress / ZOOM_IN_DURATION;
+          const easedP = 1 - Math.pow(1 - p, 3); // Ease out cubic
+          currentRadius = THREE.MathUtils.lerp(
+            startRadius,
+            closeRadius,
+            easedP,
+          );
+        } else if (progress > ZOOM_OUT_START) {
+          // Zoom Out Phase
+          const p = (progress - ZOOM_OUT_START) / (1 - ZOOM_OUT_START);
+          const easedP = Math.pow(p, 3); // Ease in cubic
+          currentRadius = THREE.MathUtils.lerp(
+            closeRadius,
+            startRadius,
+            easedP,
+          );
+        } else {
+          // Presentation Phase (Stable radius with slight breathing)
+          const p =
+            (progress - ZOOM_IN_DURATION) / (ZOOM_OUT_START - ZOOM_IN_DURATION);
+          // Very subtle breathing effect
+          currentRadius = closeRadius + Math.sin(p * Math.PI * 2) * 0.5;
+        }
+
+        // Calculate current height (Y)
+        // Trajectory: Start(2) -> Low(1) -> Spiral Up -> High(6) -> End(2)
+        let currentHeight = startHeight;
+
+        if (progress < ZOOM_IN_DURATION) {
+          // Zoom In: Drop down to low angle
+          const p = progress / ZOOM_IN_DURATION;
+          const easedP = 1 - Math.pow(1 - p, 2.5);
+          currentHeight = THREE.MathUtils.lerp(startHeight, lowHeight, easedP);
+        } else if (progress > ZOOM_OUT_START) {
+          // Zoom Out: Return from high angle to start height
+          const p = (progress - ZOOM_OUT_START) / (1 - ZOOM_OUT_START);
+          const easedP = Math.pow(p, 2.5);
+          currentHeight = THREE.MathUtils.lerp(highHeight, startHeight, easedP);
+        } else {
+          // Presentation: Spiral Upwards (Low -> High)
+          const p =
+            (progress - ZOOM_IN_DURATION) / (ZOOM_OUT_START - ZOOM_IN_DURATION);
+          // Linear ascent during rotation creates a true spiral
+          // Add slight sine wave for organic feel
+          const organicWave = Math.sin(p * Math.PI * 4) * 0.5;
+          currentHeight =
+            THREE.MathUtils.lerp(lowHeight, highHeight, p) + organicWave;
+        }
+
+        // Apply spherical coordinates
+        camera.position.set(
+          config.target.x + Math.cos(currentAngle) * currentRadius,
+          currentHeight,
+          config.target.z + Math.sin(currentAngle) * currentRadius,
+        );
+
+        camera.lookAt(config.target);
+        break;
+      }
+
       default:
         // Default static view (iso1)
         camera.position.set(6, 4, 7);
