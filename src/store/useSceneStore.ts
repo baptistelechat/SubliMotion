@@ -1,50 +1,11 @@
+import { AnimationTemplate } from "@/config/animations";
+import { CAMERA_VIEWS, CameraView } from "@/config/camera";
 import { create } from "zustand";
 
-export type CameraView =
-  | "front"
-  | "back"
-  | "left"
-  | "right"
-  | "top"
-  | "bottom"
-  | "iso1"
-  | "iso2"
-  | "iso3"
-  | "iso4";
+export { CAMERA_VIEWS, type CameraView };
 export type BackgroundType = "color" | "environment";
 
-export type AnimationTemplate =
-  | "zoom-in"
-  | "mug-rotation"
-  | "camera-rotation"
-  | "vertical-reveal"
-  | "horizontal-reveal";
-
-export const ANIMATION_TEMPLATES: Record<
-  AnimationTemplate,
-  { label: string; description: string }
-> = {
-  "zoom-in": {
-    label: "Zoom In",
-    description: "La caméra commence loin et se rapproche du mug",
-  },
-  "mug-rotation": {
-    label: "Mug Rotation",
-    description: "Le mug tourne sur lui-même",
-  },
-  "camera-rotation": {
-    label: "Camera Rotation",
-    description: "La caméra tourne autour du mug",
-  },
-  "vertical-reveal": {
-    label: "Vertical Reveal",
-    description: "Un mouvement lent de bas en haut",
-  },
-  "horizontal-reveal": {
-    label: "Horizontal Reveal",
-    description: "Un mouvement lent de côté",
-  },
-} as const;
+export { type AnimationTemplate };
 
 export const SCENE_COLORS = {
   "Gris clair": "#f3f4f6",
@@ -82,8 +43,8 @@ interface SceneState {
   triggerCameraView: () => void;
 
   // Animation Template
-  animationTemplate: AnimationTemplate;
-  setAnimationTemplate: (template: AnimationTemplate) => void;
+  animationTemplate: AnimationTemplate | null;
+  setAnimationTemplate: (template: AnimationTemplate | null) => void;
   // Trigger for re-running animation
   animationTrigger: number;
   triggerAnimation: () => void;
@@ -91,32 +52,93 @@ interface SceneState {
   // Options
   showGrid: boolean;
   toggleGrid: () => void;
+
+  // Video Preview
+  isVideoPreviewOpen: boolean;
+  setIsVideoPreviewOpen: (isOpen: boolean) => void;
+  isVideoPlaying: boolean;
+  setIsVideoPlaying: (isPlaying: boolean) => void;
+
+  // Export
+  isExporting: boolean;
+  setIsExporting: (isExporting: boolean) => void;
+  exportProgress: number;
+  setExportProgress: (progress: number) => void;
+  startExportTrigger: number;
+  triggerExport: () => void;
+
+  // Social Pack
+  isSocialPackOpen: boolean;
+  setIsSocialPackOpen: (isOpen: boolean) => void;
+
+  // Social Pack Export
+  isExportingSocialPack: boolean;
+  setIsExportingSocialPack: (isExporting: boolean) => void;
+  socialPackProgress: number;
+  setSocialPackProgress: (progress: number) => void;
+  socialPackStatus: string;
+  setSocialPackStatus: (status: string) => void;
+  socialPackText: string;
+  setSocialPackText: (text: string) => void;
 }
 
 export const useSceneStore = create<SceneState>((set) => ({
-  // Default white background
   backgroundColor: SCENE_COLORS["Gris clair"],
   setBackgroundColor: (color) => set({ backgroundColor: color }),
 
-  // Default mug colors
-  mugColor: "#ffffff",
+  mugColor: MUG_COLORS.Blanc,
   setMugColor: (color) => set({ mugColor: color }),
 
-  // Default camera view
   cameraView: null,
-  setCameraView: (view) => set({ cameraView: view }),
+  setCameraView: (view) =>
+    set((state) => ({
+      cameraView: view,
+      cameraViewTrigger: state.cameraViewTrigger + 1,
+      // If setting a view, clear animation
+      animationTemplate: null,
+    })),
   cameraViewTrigger: 0,
   triggerCameraView: () =>
     set((state) => ({ cameraViewTrigger: state.cameraViewTrigger + 1 })),
 
-  // Default animation
   animationTemplate: "zoom-in",
-  setAnimationTemplate: (template) => set({ animationTemplate: template }),
+  setAnimationTemplate: (template) =>
+    set((state) => ({
+      animationTemplate: template,
+      animationTrigger: state.animationTrigger + 1,
+      // If setting animation, clear static view (optional, maybe we want to start from a view)
+      cameraView: null,
+    })),
   animationTrigger: 0,
   triggerAnimation: () =>
     set((state) => ({ animationTrigger: state.animationTrigger + 1 })),
 
-  // Default options
   showGrid: true,
   toggleGrid: () => set((state) => ({ showGrid: !state.showGrid })),
+
+  isVideoPreviewOpen: false,
+  setIsVideoPreviewOpen: (isOpen) => set({ isVideoPreviewOpen: isOpen }),
+  isVideoPlaying: false,
+  setIsVideoPlaying: (isPlaying) => set({ isVideoPlaying: isPlaying }),
+
+  isExporting: false,
+  setIsExporting: (isExporting) => set({ isExporting }),
+  exportProgress: 0,
+  setExportProgress: (progress) => set({ exportProgress: progress }),
+  startExportTrigger: 0,
+  triggerExport: () =>
+    set((state) => ({ startExportTrigger: state.startExportTrigger + 1 })),
+
+  isSocialPackOpen: false,
+  setIsSocialPackOpen: (isOpen) => set({ isSocialPackOpen: isOpen }),
+
+  isExportingSocialPack: false,
+  setIsExportingSocialPack: (isExporting) =>
+    set({ isExportingSocialPack: isExporting }),
+  socialPackProgress: 0,
+  setSocialPackProgress: (progress) => set({ socialPackProgress: progress }),
+  socialPackStatus: "",
+  setSocialPackStatus: (status) => set({ socialPackStatus: status }),
+  socialPackText: "",
+  setSocialPackText: (text) => set({ socialPackText: text }),
 }));
