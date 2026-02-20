@@ -7,6 +7,7 @@ import {
   ArrowRightFromLine,
   ArrowUpFromLine,
   Camera,
+  Clapperboard,
   Pause,
   Play,
   RotateCw,
@@ -28,6 +29,7 @@ const TEMPLATE_ICONS: Record<AnimationTemplate, LucideIcon> = {
   "spiral-up": Tornado,
   "dramatic-zoom": Zap,
   "complete-showcase": Sparkles,
+  "apple-style": Clapperboard,
 };
 
 export function TemplateSelector() {

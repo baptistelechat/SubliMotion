@@ -9,7 +9,8 @@ export type AnimationTemplate =
   | "horizontal-reveal"
   | "spiral-up"
   | "dramatic-zoom"
-  | "complete-showcase";
+  | "complete-showcase"
+  | "apple-style";
 
 export const ANIMATION_TEMPLATES: Record<
   AnimationTemplate,
@@ -50,6 +51,10 @@ export const ANIMATION_TEMPLATES: Record<
   "complete-showcase": {
     label: "Présentation Complète",
     description: "Entrée zoom, spirale de présentation, et sortie zoom out",
+  },
+  "apple-style": {
+    label: "Présentation Tech (Apple Style)",
+    description: "Séquence dynamique avec cuts, zooms et travelings rapides",
   },
 } as const;
 
@@ -127,5 +132,10 @@ export const ANIMATION_CONFIG: Record<
     cameraStart: new THREE.Vector3(0, 10, 30),
     cameraEnd: new THREE.Vector3(5, 2, 5),
     target: new THREE.Vector3(0, -0.5, 0),
+  },
+  "apple-style": {
+    durationInSeconds: 15,
+    cameraStart: new THREE.Vector3(0, -8, 4), // Start of Vertical Reveal
+    target: DEFAULT_TARGET,
   },
 };

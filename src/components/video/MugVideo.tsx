@@ -268,6 +268,69 @@ export function VideoCamera({ frame, durationInFrames }: VideoCameraProps) {
         break;
       }
 
+      case "apple-style": {
+        // 4 Phases (Total 15s)
+        const PHASE_1 = 0.2; // 0-3s: Vertical Reveal
+        const PHASE_2 = 0.6; // 3-9s: Inverted Spiral (Top -> Bottom) - Longer for slower effect
+        const PHASE_3 = 0.8; // 9-12s: Horizontal Reveal
+        const PHASE_4 = 1.0; // 12-15s: Hero Shot
+
+        const currentPos = new THREE.Vector3();
+        const currentTarget = config.target;
+
+        if (progress < PHASE_1) {
+          // Phase 1: Vertical Reveal (0-3s)
+          const p = progress / PHASE_1;
+          const easedP = 1 - Math.pow(1 - p, 3); // Ease out cubic
+          const start = new THREE.Vector3(0, -8, 4);
+          const end = new THREE.Vector3(0, 1.5, 8);
+          currentPos.lerpVectors(start, end, easedP);
+        } else if (progress < PHASE_2) {
+          // Phase 2: Inverted Spiral (Top -> Bottom) (3-9s)
+          const p = (progress - PHASE_1) / (PHASE_2 - PHASE_1);
+          // Start High (8, 8, 8) -> End Low (5, 0, 5)
+          const startHigh = new THREE.Vector3(8, 8, 8);
+          const endLow = new THREE.Vector3(5, 0, 5);
+
+          const startRadius = Math.sqrt(
+            Math.pow(startHigh.x - config.target.x, 2) +
+              Math.pow(startHigh.z - config.target.z, 2),
+          );
+          const endRadius = Math.sqrt(
+            Math.pow(endLow.x - config.target.x, 2) +
+              Math.pow(endLow.z - config.target.z, 2),
+          );
+
+          const currentRadius = THREE.MathUtils.lerp(startRadius, endRadius, p);
+          const currentY = THREE.MathUtils.lerp(startHigh.y, endLow.y, p);
+
+          // Rotate 1 full turn (very slow over 6s)
+          const angle = p * Math.PI * 2;
+          currentPos.set(
+            config.target.x + Math.cos(angle) * currentRadius,
+            currentY,
+            config.target.z + Math.sin(angle) * currentRadius,
+          );
+        } else if (progress < PHASE_3) {
+          // Phase 3: Horizontal Reveal (9-12s)
+          const p = (progress - PHASE_2) / (PHASE_3 - PHASE_2);
+          const easedP = 1 - Math.pow(1 - p, 3);
+          const start = new THREE.Vector3(-12, 1.5, 0);
+          const end = new THREE.Vector3(0, 1.5, 8);
+          currentPos.lerpVectors(start, end, easedP);
+        } else {
+          // Phase 4: Hero Shot (12-15s)
+          const p = (progress - PHASE_3) / (PHASE_4 - PHASE_3);
+          const start = new THREE.Vector3(6, 4, 7);
+          const end = new THREE.Vector3(5, 3, 6);
+          currentPos.lerpVectors(start, end, p);
+        }
+
+        camera.position.copy(currentPos);
+        camera.lookAt(currentTarget);
+        break;
+      }
+
       default:
         // Default static view (iso1)
         camera.position.set(6, 4, 7);
