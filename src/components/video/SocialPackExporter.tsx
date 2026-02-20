@@ -11,11 +11,12 @@ import { Canvas, useThree } from "@react-three/fiber";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
 import * as Muxer from "mp4-muxer";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { interpolate } from "remotion";
 import { toast } from "sonner";
 import * as THREE from "three";
 import { MugContent, MugLights } from "../scene/MugContent";
+import { SceneEnvironment } from "../scene/SceneEnvironment";
 import { VideoCamera } from "./MugVideo";
 import { CAMERA_CONFIGS } from "@/config/camera";
 
@@ -336,25 +337,28 @@ export function SocialPackExporter() {
         style={{ width: width, height: height }}
         camera={{ position: [6, 4, 7], fov: 45, near: 0.1, far: 1000 }}
       >
-        <MugLights />
-        <MugContent mugRotation={mugRotation} />
-        {currentTask?.type === "video" && (
-          <VideoCamera
-            frame={currentFrame}
-            durationInFrames={durationInFrames}
-          />
-        )}
-        {/* For images, we rely on setCameraView updating the global camera, 
+        <Suspense fallback={null}>
+          <SceneEnvironment />
+          <MugLights />
+          <MugContent mugRotation={mugRotation} />
+          {currentTask?.type === "video" && (
+            <VideoCamera
+              frame={currentFrame}
+              durationInFrames={durationInFrames}
+            />
+          )}
+          {/* For images, we rely on setCameraView updating the global camera, 
             but we need to make sure THIS canvas's camera is updated.
             Actually, setCameraView updates the global store, but VideoCamera only runs for videos.
             For images, we need a camera controller that respects 'cameraView' from store.
             However, 'VideoCamera' component is tied to animation.
             We need a 'StaticCamera' component for images.
         */}
-        {currentTask?.type === "image" && (
-          <StaticCamera view={currentTask.name as CameraView} />
-        )}
-        <ExporterScene frame={currentFrame} onRender={handleRender} />
+          {currentTask?.type === "image" && (
+            <StaticCamera view={currentTask.name as CameraView} />
+          )}
+          <ExporterScene frame={currentFrame} onRender={handleRender} />
+        </Suspense>
       </Canvas>
     </div>
   );

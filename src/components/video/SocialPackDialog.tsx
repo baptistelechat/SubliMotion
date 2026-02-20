@@ -144,7 +144,7 @@ export function SocialPackDialog() {
           </div>
         </div>
 
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-2 flex-col">
           <Button
             variant="outline"
             onClick={() => setIsSocialPackOpen(false)}

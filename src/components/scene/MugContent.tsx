@@ -3,8 +3,9 @@
 import { ASSETS } from "@/config/assets";
 import { useSceneStore } from "@/store/useSceneStore";
 import { useTextureStore } from "@/store/useTextureStore";
-import { ContactShadows, Environment, Grid, useGLTF } from "@react-three/drei";
+import { ContactShadows, Grid, useGLTF } from "@react-three/drei";
 import { useLoader } from "@react-three/fiber";
+import { EffectComposer, Vignette } from "@react-three/postprocessing";
 import { Suspense, useEffect, useMemo } from "react";
 import * as THREE from "three";
 
@@ -62,8 +63,9 @@ function PrintLayer({
         map={clonedTexture}
         transparent
         side={THREE.DoubleSide}
-        roughness={0.2}
-        metalness={0.1}
+        roughness={0.15}
+        metalness={0.0}
+        envMapIntensity={1}
         depthWrite={true}
         polygonOffset={true}
         polygonOffsetFactor={-4}
@@ -87,6 +89,10 @@ function MugWithPrint() {
         mesh.receiveShadow = true;
         if (!Array.isArray(mesh.material)) {
           mesh.material = mesh.material.clone();
+          // Adjust material properties for better ceramic look
+          (mesh.material as THREE.MeshStandardMaterial).roughness = 0.15;
+          (mesh.material as THREE.MeshStandardMaterial).metalness = 0.0;
+          (mesh.material as THREE.MeshStandardMaterial).envMapIntensity = 1;
         }
       }
     });
@@ -124,6 +130,9 @@ function MugWithPrint() {
           const material = mesh.material as THREE.MeshStandardMaterial;
           if (material.name === "Material.001") {
             material.color.set(mugColor);
+            material.roughness = 0.15;
+            material.metalness = 0.0;
+            material.envMapIntensity = 1;
           }
         }
       }
@@ -146,34 +155,44 @@ function MugWithPrint() {
   );
 }
 
-export function MugLights() {
+export function MugLights({
+  intensity = 0.8,
+  ambientIntensity = 0.3,
+}: {
+  intensity?: number;
+  ambientIntensity?: number;
+}) {
   return (
     <>
-      <ambientLight intensity={0.5} />
+      <ambientLight intensity={ambientIntensity} />
       <directionalLight
-        position={[5, 5, 5]}
-        intensity={1}
+        position={[8, 10, 8]}
+        intensity={intensity}
         castShadow
-        shadow-mapSize={[1024, 1024]}
+        shadow-mapSize={[2048, 2048]}
+        shadow-bias={-0.0001}
       />
+      <directionalLight position={[-8, 10, -8]} intensity={intensity * 0.4} />
     </>
   );
 }
 
 export function MugContent({ mugRotation = 0 }: { mugRotation?: number }) {
   const showGrid = useSceneStore((state) => state.showGrid);
-  const backgroundColor = useSceneStore((state) => state.backgroundColor);
 
   return (
     <>
-      <color attach="background" args={[backgroundColor]} />
-
       <group position={[0, -2, 0]} rotation={[0, mugRotation, 0]}>
         <Suspense fallback={null}>
           <MugWithPrint />
-          <Environment preset="studio" />
+
+          <MugLights intensity={0.6} ambientIntensity={0.4} />
         </Suspense>
       </group>
+
+      <EffectComposer enableNormalPass={false}>
+        <Vignette eskil={false} offset={0.1} darkness={0.4} />
+      </EffectComposer>
 
       {showGrid && (
         <group position={[0, -2, 0]}>
@@ -192,9 +211,10 @@ export function MugContent({ mugRotation = 0 }: { mugRotation?: number }) {
           <ContactShadows
             position={[0, 0.01, 0]}
             opacity={0.4}
-            scale={10}
+            scale={20}
             blur={2}
             far={4}
+            resolution={1024}
             color="#000000"
           />
         </group>

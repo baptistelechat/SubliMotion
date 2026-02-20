@@ -4,6 +4,17 @@ import { create } from "zustand";
 
 export { CAMERA_VIEWS, type CameraView };
 export type BackgroundType = "color" | "environment";
+export type EnvironmentPreset =
+  | "sunset"
+  | "dawn"
+  | "night"
+  | "warehouse"
+  | "forest"
+  | "apartment"
+  | "studio"
+  | "city"
+  | "park"
+  | "lobby";
 
 export { type AnimationTemplate };
 
@@ -28,8 +39,20 @@ export type SceneColor = string;
 
 interface SceneState {
   // Background
-  backgroundColor: SceneColor;
-  setBackgroundColor: (color: SceneColor) => void;
+  backgroundColor: string;
+  setBackgroundColor: (color: string) => void;
+
+  // Lighting
+  lightingPreset: EnvironmentPreset;
+  setLightingPreset: (preset: EnvironmentPreset) => void;
+
+  // Background
+  backgroundStyle: "color" | "image";
+  setBackgroundStyle: (style: "color" | "image") => void;
+  backgroundPreset: EnvironmentPreset;
+  setBackgroundPreset: (preset: EnvironmentPreset) => void;
+  blurBackground: boolean;
+  setBlurBackground: (blur: boolean) => void;
 
   // Mug Colors
   mugColor: string;
@@ -85,6 +108,16 @@ interface SceneState {
 export const useSceneStore = create<SceneState>((set) => ({
   backgroundColor: SCENE_COLORS["Gris clair"],
   setBackgroundColor: (color) => set({ backgroundColor: color }),
+
+  lightingPreset: "studio",
+  setLightingPreset: (preset) => set({ lightingPreset: preset }),
+
+  backgroundStyle: "color",
+  setBackgroundStyle: (style) => set({ backgroundStyle: style }),
+  backgroundPreset: "studio",
+  setBackgroundPreset: (preset) => set({ backgroundPreset: preset }),
+  blurBackground: true,
+  setBlurBackground: (blur) => set({ blurBackground: blur }),
 
   mugColor: MUG_COLORS.Blanc,
   setMugColor: (color) => set({ mugColor: color }),

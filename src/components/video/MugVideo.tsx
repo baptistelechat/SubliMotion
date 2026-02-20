@@ -4,7 +4,7 @@ import { ANIMATION_CONFIG, DEFAULT_TARGET } from "@/config/animations";
 import { useSceneStore } from "@/store/useSceneStore";
 import { useThree } from "@react-three/fiber";
 import { ThreeCanvas } from "@remotion/three";
-import { useLayoutEffect } from "react";
+import { Suspense, useLayoutEffect } from "react";
 import {
   AbsoluteFill,
   interpolate,
@@ -13,6 +13,7 @@ import {
 } from "remotion";
 import * as THREE from "three";
 import { MugContent, MugLights } from "../scene/MugContent";
+import { SceneEnvironment } from "../scene/SceneEnvironment";
 
 interface VideoCameraProps {
   frame: number;
@@ -366,6 +367,9 @@ export const MugVideo = () => {
         gl={{ antialias: true, logarithmicDepthBuffer: true }}
         camera={{ position: [6, 4, 7], fov: 45, near: 0.1, far: 1000 }}
       >
+        <Suspense fallback={null}>
+          <SceneEnvironment />
+        </Suspense>
         <MugLights />
         <MugContent mugRotation={mugRotation} />
         <VideoCamera frame={frame} durationInFrames={durationInFrames} />

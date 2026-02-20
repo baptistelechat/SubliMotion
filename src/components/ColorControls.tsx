@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { MUG_COLORS, useSceneStore } from "@/store/useSceneStore";
+import { Label } from "./ui/label";
 
 export function ColorControls() {
   const { mugColor, setMugColor } = useSceneStore();
@@ -11,9 +12,9 @@ export function ColorControls() {
       {/* Mug Color */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <label className="text-sm font-medium text-gray-700">
+          <Label className="text-sm font-medium text-gray-700">
             Couleur du mug
-          </label>
+          </Label>
           <span className="text-xs text-gray-500 uppercase font-mono">
             {mugColor}
           </span>

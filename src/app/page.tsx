@@ -1,6 +1,8 @@
 "use client";
 
+import { BackgroundControls } from "@/components/BackgroundControls";
 import { ColorControls } from "@/components/ColorControls";
+import { LightingControls } from "@/components/LightingControls";
 import MobileBlocker from "@/components/MobileBlocker";
 import { TemplateSelector } from "@/components/TemplateSelector";
 import { TextureUploader } from "@/components/dropzone/TextureUploader";
@@ -8,14 +10,13 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ExportOverlay } from "@/components/video/ExportOverlay";
 import { cn } from "@/lib/utils";
-import { CameraView, SCENE_COLORS, useSceneStore } from "@/store/useSceneStore";
+import { CameraView, useSceneStore } from "@/store/useSceneStore";
 import { useTextureStore } from "@/store/useTextureStore";
 import {
   ArrowLeft,
   ArrowLeftToLine,
   ArrowRightToLine,
   Box,
-  Check,
   ChevronDown,
   ChevronUp,
   Download,
@@ -122,8 +123,6 @@ function LandingView() {
 function EditorView() {
   const { clearTexture } = useTextureStore();
   const {
-    backgroundColor,
-    setBackgroundColor,
     cameraView,
     setCameraView,
     triggerCameraView,
@@ -143,25 +142,6 @@ function EditorView() {
       setCameraView(view);
     }
   };
-
-  const backgrounds = [
-    {
-      name: "Gris clair",
-      value: SCENE_COLORS["Gris clair"],
-      class: "bg-gray-100",
-    },
-    {
-      name: "Gris moyen",
-      value: SCENE_COLORS["Gris moyen"],
-      class: "bg-gray-400",
-    },
-    {
-      name: "Gris foncé",
-      value: SCENE_COLORS["Gris foncé"],
-      class: "bg-gray-700",
-    },
-    { name: "Noir", value: SCENE_COLORS["Noir"], class: "bg-black" },
-  ];
 
   const views: { id: CameraView; label: string; icon: React.ReactNode }[] = [
     { id: "front", label: "Face", icon: <ChevronUp className="size-4" /> },
@@ -269,67 +249,14 @@ function EditorView() {
                 <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
                   Fond
                 </h2>
-                <div className="grid grid-cols-5 gap-2">
-                  {backgrounds.map((bg) => (
-                    <button
-                      key={bg.value}
-                      onClick={() => setBackgroundColor(bg.value)}
-                      className={cn(
-                        "w-full aspect-square rounded-md border transition-all cursor-pointer flex items-center justify-center",
-                        bg.class,
-                        backgroundColor === bg.value
-                          ? "ring-2 ring-primary ring-offset-2"
-                          : "hover:ring-2 ring-primary/50",
-                      )}
-                      title={bg.name}
-                    >
-                      <Check
-                        className={cn(
-                          "size-6",
-                          backgroundColor === bg.value
-                            ? bg.name === "Gris clair" ||
-                              bg.name === "Gris moyen"
-                              ? "text-primary"
-                              : "text-secondary"
-                            : "hidden",
-                        )}
-                      />
-                    </button>
-                  ))}
+                <BackgroundControls />
+              </div>
 
-                  <div
-                    className={cn(
-                      "relative w-full aspect-square rounded-md border overflow-hidden transition-all group",
-                      !(Object.values(SCENE_COLORS) as string[]).includes(
-                        backgroundColor,
-                      ) && "ring-2 ring-primary ring-offset-2",
-                    )}
-                    title="Couleur personnalisée"
-                  >
-                    <div
-                      className="absolute inset-0 bg-linear-to-br from-red-500 via-green-500 to-blue-500 opacity-50 group-hover:opacity-100 transition-opacity"
-                      style={
-                        !(Object.values(SCENE_COLORS) as string[]).includes(
-                          backgroundColor,
-                        )
-                          ? { background: backgroundColor, opacity: 1 }
-                          : {}
-                      }
-                    />
-                    <input
-                      type="color"
-                      value={
-                        !(Object.values(SCENE_COLORS) as string[]).includes(
-                          backgroundColor,
-                        )
-                          ? backgroundColor
-                          : "#ffffff"
-                      }
-                      onChange={(e) => setBackgroundColor(e.target.value)}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    />
-                  </div>
-                </div>
+              <div>
+                <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
+                  Éclairage
+                </h2>
+                <LightingControls />
               </div>
 
               <div>

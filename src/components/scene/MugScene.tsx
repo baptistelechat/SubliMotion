@@ -3,14 +3,32 @@
 import { ANIMATION_CONFIG } from "@/config/animations";
 import { CAMERA_CONFIGS } from "@/config/camera";
 import { useSceneStore } from "@/store/useSceneStore";
-import { CameraControls, useGLTF } from "@react-three/drei";
+import { CameraControls, useGLTF, useProgress } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useEffect, useRef, useState, type ElementRef } from "react";
+import { Suspense, useEffect, useRef, useState, type ElementRef } from "react";
 import * as THREE from "three";
 import { MugContent, MugLights } from "./MugContent";
+import { SceneEnvironment } from "./SceneEnvironment";
 
 // Preload pour éviter le waterfall
 useGLTF.preload("/models/mug/scene.gltf");
+
+function CustomLoader() {
+  const { active, progress } = useProgress();
+
+  if (!active) return null;
+
+  return (
+    <div className="absolute inset-0 z-1000 flex items-center justify-center w-full h-full bg-gray-50/80 backdrop-blur-sm text-muted-foreground">
+      <div className="flex flex-col items-center gap-2">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-sm font-medium">
+          Chargement {progress.toFixed(0)}%...
+        </p>
+      </div>
+    </div>
+  );
+}
 
 function SceneController() {
   const cameraView = useSceneStore((state) => state.cameraView);
@@ -474,12 +492,16 @@ export default function MugScene() {
         gl={{ antialias: true }}
         dpr={[1, 2]}
       >
+        <Suspense fallback={null}>
+          <SceneEnvironment />
+        </Suspense>
         <MugLights />
         <MugRotationController>
           {(rotation) => <MugContent mugRotation={rotation} />}
         </MugRotationController>
         <SceneController />
       </Canvas>
+      <CustomLoader />
     </div>
   );
 }

@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SubliMotion
 
-## Getting Started
+Application de personnalisation de mugs en 3D avec React Three Fiber.
 
-First, run the development server:
+## 🎨 Configuration des Environnements (Fonds et Éclairages)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Les environnements 3D (HDRIs) sont utilisés à la fois pour l'éclairage de la scène et pour l'image d'arrière-plan.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Ajouter un nouveau preset
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Pour ajouter un nouvel environnement, vous devez suivre ces deux étapes :
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1.  **Déclarer l'identifiant du preset**
+    Ouvrez `src/store/useSceneStore.ts` et ajoutez un nouvel ID dans le type `EnvironmentPreset` :
 
-## Learn More
+    ```typescript
+    export type EnvironmentPreset =
+      | "studio"
+      | "apartment"
+      // ...
+      | "mon-nouveau-preset"; // <-- Ajoutez votre ID ici
+    ```
 
-To learn more about Next.js, take a look at the following resources:
+2.  **Configurer le preset**
+    Ouvrez `src/config/presets.ts` et ajoutez la configuration dans le tableau `ENVIRONMENT_PRESETS` :
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+    ```typescript
+    {
+      id: "mon-nouveau-preset",
+      label: "Mon Super Studio",
+      image: "/path/to/preview-image.jpg", // Image de prévisualisation (miniature)
+      // Optionnel : Lien vers un fichier HDR/EXR personnalisé (pour la haute résolution)
+      files: "/assets/hdr/mon-studio-4k.hdr" 
+    }
+    ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 📷 Augmenter la résolution (Haute Qualité)
 
-## Deploy on Vercel
+Les presets par défaut (comme "studio", "city", etc.) sont fournis par la librairie `@react-three/drei` et sont souvent optimisés pour le web (1k ou 2k), ce qui peut paraître flou en arrière-plan sur les grands écrans.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Pour utiliser une **haute résolution** :
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1.  Téléchargez un fichier HDRI (format `.hdr` ou `.exr`) en 4k ou plus (ex: sur [Poly Haven](https://polyhaven.com/hdris)).
+2.  Placez le fichier dans le dossier `public/` de votre projet (ex: `public/hdr/mon-fichier-4k.hdr`).
+3.  Dans `src/config/presets.ts`, utilisez la propriété `files` pour pointer vers ce fichier :
+
+    ```typescript
+    {
+      id: "studio-high-res",
+      label: "Studio (Haute Résolution)",
+      image: "...",
+      files: "/hdr/mon-fichier-4k.hdr" // Chemin relatif au dossier public
+    }
+    ```
+
+Cela forcera l'application à charger votre fichier haute qualité au lieu du preset par défaut.
+
+## 🛠️ Stack Technique
+
+- **Framework** : Next.js 15
+- **3D** : React Three Fiber (Three.js)
+- **Styling** : Tailwind CSS
+- **State** : Zustand
