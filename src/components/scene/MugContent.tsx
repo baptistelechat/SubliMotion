@@ -50,6 +50,7 @@ function PrintLayer({
         texture.dispose();
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url]); // Intentionally remove 'texture' from deps to avoid loop
 
   // Cleanup texture when component unmounts or texture changes

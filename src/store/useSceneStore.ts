@@ -103,6 +103,14 @@ interface SceneState {
   setSocialPackStatus: (status: string) => void;
   socialPackText: string;
   setSocialPackText: (text: string) => void;
+  socialPackOptions: {
+    includeImages: boolean;
+    includeVideos: boolean;
+  };
+  setSocialPackOptions: (options: {
+    includeImages: boolean;
+    includeVideos: boolean;
+  }) => void;
 }
 
 export const useSceneStore = create<SceneState>((set) => ({
@@ -174,4 +182,6 @@ export const useSceneStore = create<SceneState>((set) => ({
   setSocialPackStatus: (status) => set({ socialPackStatus: status }),
   socialPackText: "",
   setSocialPackText: (text) => set({ socialPackText: text }),
+  socialPackOptions: { includeImages: true, includeVideos: true },
+  setSocialPackOptions: (options) => set({ socialPackOptions: options }),
 }));

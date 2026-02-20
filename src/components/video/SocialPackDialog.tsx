@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -8,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { IMAGE_CONFIG, VIDEO_CONFIG } from "@/config/animations";
 import { SOCIAL_PACK_CONFIG } from "@/config/social-pack";
 import { useSceneStore } from "@/store/useSceneStore";
@@ -38,6 +40,10 @@ export function SocialPackDialog() {
   const socialPackProgress = useSceneStore((state) => state.socialPackProgress);
   const socialPackStatus = useSceneStore((state) => state.socialPackStatus);
   const setSocialPackText = useSceneStore((state) => state.setSocialPackText);
+  const socialPackOptions = useSceneStore((state) => state.socialPackOptions);
+  const setSocialPackOptions = useSceneStore(
+    (state) => state.setSocialPackOptions,
+  );
 
   const [selectedTemplate, setSelectedTemplate] = useState(
     SOCIAL_PACK_CONFIG.templates[0],
@@ -134,13 +140,93 @@ export function SocialPackDialog() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <h4 className="text-sm font-medium">Contenu du Pack (ZIP)</h4>
-            <ul className="text-xs text-muted-foreground list-disc pl-4 space-y-1">
-              <li>{`Toutes les animations vidéo (Format Carré ${VIDEO_CONFIG.WIDTH}x${VIDEO_CONFIG.HEIGHT} - ${VIDEO_CONFIG.FPS}fps)`}</li>
-              <li>{`Images de toutes les vues caméra (Format Carré ${IMAGE_CONFIG.WIDTH}x${IMAGE_CONFIG.HEIGHT})`}</li>
-              <li>Fichier texte avec légendes et hashtags</li>
-            </ul>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-medium">Contenu du Pack (ZIP)</h4>
+              <div className="flex gap-2 text-xs text-muted-foreground">
+                <button
+                  onClick={() =>
+                    setSocialPackOptions({
+                      includeImages: true,
+                      includeVideos: true,
+                    })
+                  }
+                  className="hover:text-primary transition-colors underline decoration-dotted"
+                >
+                  Tout sélectionner
+                </button>
+                <span>/</span>
+                <button
+                  onClick={() =>
+                    setSocialPackOptions({
+                      includeImages: false,
+                      includeVideos: false,
+                    })
+                  }
+                  className="hover:text-primary transition-colors underline decoration-dotted"
+                >
+                  Tout désélectionner
+                </button>
+              </div>
+            </div>
+
+            <div className="grid gap-3 p-3 border rounded-md bg-muted/20">
+              <div className="flex items-start space-x-3">
+                <Checkbox
+                  id="include-videos"
+                  checked={socialPackOptions.includeVideos}
+                  onCheckedChange={(checked) =>
+                    setSocialPackOptions({
+                      ...socialPackOptions,
+                      includeVideos: checked === true,
+                    })
+                  }
+                />
+                <div className="grid gap-1.5 leading-none">
+                  <Label
+                    htmlFor="include-videos"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Vidéos (Animations)
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Toutes les animations vidéo (Format Carré{" "}
+                    {VIDEO_CONFIG.WIDTH}x{VIDEO_CONFIG.HEIGHT} -{" "}
+                    {VIDEO_CONFIG.FPS}fps)
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-3">
+                <Checkbox
+                  id="include-images"
+                  checked={socialPackOptions.includeImages}
+                  onCheckedChange={(checked) =>
+                    setSocialPackOptions({
+                      ...socialPackOptions,
+                      includeImages: checked === true,
+                    })
+                  }
+                />
+                <div className="grid gap-1.5 leading-none">
+                  <Label
+                    htmlFor="include-images"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Images (Vues Caméra)
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Images de toutes les vues caméra (Format Carré{" "}
+                    {IMAGE_CONFIG.WIDTH}x{IMAGE_CONFIG.HEIGHT})
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="text-xs text-muted-foreground pl-4 border-l-2">
+              Le pack inclura également le fichier texte avec légendes et
+              hashtags.
+            </div>
           </div>
         </div>
 

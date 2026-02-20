@@ -64,6 +64,7 @@ export function SocialPackExporter() {
     (state) => state.setSocialPackStatus,
   );
   const socialPackText = useSceneStore((state) => state.socialPackText);
+  const socialPackOptions = useSceneStore((state) => state.socialPackOptions);
 
   // Store actions to control the scene
   const setCameraView = useSceneStore((state) => state.setCameraView);
@@ -183,22 +184,24 @@ export function SocialPackExporter() {
       const tasks: ExportTask[] = [];
 
       // Images
-      CAMERA_VIEWS.forEach((view) => {
-        tasks.push({ type: "image", name: view });
-      });
-
-      // Videos - Only do a subset or all? User said "toutes les animations"
-      // But "toutes" might take forever. Let's do the main ones.
-      // Actually, let's do all of them as requested.
-      Object.keys(ANIMATION_CONFIG).forEach((anim) => {
-        tasks.push({
-          type: "video",
-          name: anim as AnimationTemplate,
-          duration:
-            ANIMATION_CONFIG[anim as keyof typeof ANIMATION_CONFIG]
-              .durationInSeconds * fps,
+      if (socialPackOptions.includeImages) {
+        CAMERA_VIEWS.forEach((view) => {
+          tasks.push({ type: "image", name: view });
         });
-      });
+      }
+
+      // Videos
+      if (socialPackOptions.includeVideos) {
+        Object.keys(ANIMATION_CONFIG).forEach((anim) => {
+          tasks.push({
+            type: "video",
+            name: anim as AnimationTemplate,
+            duration:
+              ANIMATION_CONFIG[anim as keyof typeof ANIMATION_CONFIG]
+                .durationInSeconds * fps,
+          });
+        });
+      }
 
       taskQueueRef.current = tasks;
       setSocialPackProgress(0);
@@ -212,6 +215,7 @@ export function SocialPackExporter() {
     processNextTask,
     fps,
     setSocialPackProgress,
+    socialPackOptions,
   ]);
 
   const handleRender = useCallback(
