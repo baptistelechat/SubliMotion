@@ -1,13 +1,9 @@
 "use client";
 
-import { BackgroundControls } from "@/components/BackgroundControls";
-import { ColorControls } from "@/components/ColorControls";
-import { LightingControls } from "@/components/LightingControls";
 import MobileBlocker from "@/components/MobileBlocker";
-import { TemplateSelector } from "@/components/TemplateSelector";
+import { SidebarControls } from "@/components/controls/SidebarControls";
 import { TextureUploader } from "@/components/dropzone/TextureUploader";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { ExportOverlay } from "@/components/video/ExportOverlay";
 import { cn } from "@/lib/utils";
 import { CameraView, useSceneStore } from "@/store/useSceneStore";
@@ -54,6 +50,7 @@ const VideoPreview = dynamic(
 );
 
 import { SocialPackDialog } from "@/components/video/SocialPackDialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const SocialPackExporter = dynamic(
   () =>
@@ -126,8 +123,6 @@ function EditorView() {
     cameraView,
     setCameraView,
     triggerCameraView,
-    showGrid,
-    toggleGrid,
     isVideoPreviewOpen,
     setIsVideoPreviewOpen,
     isExporting,
@@ -227,73 +222,7 @@ function EditorView() {
         {/* Editor Layout: Left (Tools) - Center (3D) - Right (Views) */}
         <div className="flex-1 flex flex-col md:flex-row h-[calc(100dvh-64px)] overflow-hidden">
           {/* Left Panel: Tools */}
-          <ScrollArea className="w-full md:w-80 border-r bg-card/50 h-full">
-            <div className="p-4 flex flex-col gap-6">
-              <div>
-                <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
-                  Texture
-                </h2>
-                <div className="h-48">
-                  <TextureUploader />
-                </div>
-              </div>
-
-              <div>
-                <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
-                  Personnalisation
-                </h2>
-                <ColorControls />
-              </div>
-
-              <div>
-                <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
-                  Fond
-                </h2>
-                <BackgroundControls />
-              </div>
-
-              <div>
-                <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
-                  Éclairage
-                </h2>
-                <LightingControls />
-              </div>
-
-              <div>
-                <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
-                  Animation
-                </h2>
-                <TemplateSelector />
-              </div>
-
-              <div>
-                <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
-                  Options
-                </h2>
-                <div className="space-y-2">
-                  <div
-                    className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50 cursor-pointer"
-                    onClick={toggleGrid}
-                  >
-                    <span className="text-sm">Afficher la grille</span>
-                    <div
-                      className={cn(
-                        "w-9 h-5 rounded-full relative transition-colors",
-                        showGrid ? "bg-primary" : "bg-muted",
-                      )}
-                    >
-                      <div
-                        className={cn(
-                          "absolute top-0.5 size-4 bg-white rounded-full transition-all shadow-sm",
-                          showGrid ? "right-0.5" : "left-0.5",
-                        )}
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </ScrollArea>
+          <SidebarControls />
 
           {/* Center Panel: 3D Canvas */}
           <div className="flex-1 bg-gray-100/50 relative touch-none overflow-hidden">

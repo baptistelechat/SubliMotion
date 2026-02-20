@@ -33,14 +33,14 @@ const TEMPLATE_ICONS: Record<AnimationTemplate, LucideIcon> = {
 };
 
 export function TemplateSelector() {
-  const {
-    animationTemplate,
-    setAnimationTemplate,
-    triggerAnimation,
-    isVideoPreviewOpen,
-    isVideoPlaying,
-    setIsVideoPlaying,
-  } = useSceneStore();
+  const animationTemplate = useSceneStore((state) => state.animationTemplate);
+  const setAnimationTemplate = useSceneStore(
+    (state) => state.setAnimationTemplate,
+  );
+  const triggerAnimation = useSceneStore((state) => state.triggerAnimation);
+  const isVideoPreviewOpen = useSceneStore((state) => state.isVideoPreviewOpen);
+  const isVideoPlaying = useSceneStore((state) => state.isVideoPlaying);
+  const setIsVideoPlaying = useSceneStore((state) => state.setIsVideoPlaying);
 
   const handleSelect = (key: AnimationTemplate) => {
     // If in Video Preview mode and clicking the selected animation, toggle Play/Pause

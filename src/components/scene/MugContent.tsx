@@ -1,12 +1,12 @@
 "use client";
 
+import { ANIMATION_CONFIG } from "@/config/animations";
 import { ASSETS } from "@/config/assets";
 import { useSceneStore } from "@/store/useSceneStore";
 import { useTextureStore } from "@/store/useTextureStore";
 import { ContactShadows, Grid, useGLTF } from "@react-three/drei";
-import { useLoader } from "@react-three/fiber";
-import { EffectComposer, Vignette } from "@react-three/postprocessing";
-import { Suspense, useEffect, useMemo } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
 // Preload pour éviter le waterfall
@@ -25,25 +25,43 @@ function PrintLayer({
   radius: number;
   height: number;
 }) {
-  const texture = useLoader(THREE.TextureLoader, url);
-
-  const clonedTexture = useMemo(() => {
-    const t = texture.clone();
-    t.colorSpace = THREE.SRGBColorSpace;
-    t.flipY = true;
-    t.wrapS = THREE.RepeatWrapping;
-    t.wrapT = THREE.RepeatWrapping;
-    t.needsUpdate = true;
-    return t;
-  }, [texture]);
+  const [texture, setTexture] = useState<THREE.Texture | null>(null);
 
   useEffect(() => {
+    const loader = new THREE.TextureLoader();
+    let isMounted = true;
+
+    loader.load(url, (t) => {
+      if (isMounted) {
+        t.colorSpace = THREE.SRGBColorSpace;
+        t.flipY = true;
+        t.wrapS = THREE.RepeatWrapping;
+        t.wrapT = THREE.RepeatWrapping;
+        t.needsUpdate = true;
+        setTexture(t);
+      } else {
+        t.dispose();
+      }
+    });
+
     return () => {
-      clonedTexture.dispose();
-      // On ne clear pas le cache de la texture pour éviter le clignotement dans la preview vidéo
-      // useLoader.clear(THREE.TextureLoader, url);
+      isMounted = false;
+      if (texture) {
+        texture.dispose();
+      }
     };
-  }, [clonedTexture, url]);
+  }, [url]); // Intentionally remove 'texture' from deps to avoid loop
+
+  // Cleanup texture when component unmounts or texture changes
+  useEffect(() => {
+    return () => {
+      if (texture) {
+        texture.dispose();
+      }
+    };
+  }, [texture]);
+
+  if (!texture) return null;
 
   return (
     <mesh position={[0, height / 2, 0]} rotation={[0, Math.PI, 0]}>
@@ -60,7 +78,7 @@ function PrintLayer({
         ]}
       />
       <meshStandardMaterial
-        map={clonedTexture}
+        map={texture}
         transparent
         side={THREE.DoubleSide}
         roughness={0.15}
@@ -77,6 +95,7 @@ function PrintLayer({
 
 function MugWithPrint() {
   const { scene: originalScene } = useGLTF(ASSETS.MODELS.MUG);
+
   const scene = useMemo(() => {
     // Clone the scene to ensure each instance (Editor vs Preview) has its own scene graph
     const cloned = originalScene.clone();
@@ -100,10 +119,27 @@ function MugWithPrint() {
     return cloned;
   }, [originalScene]);
 
+  useEffect(() => {
+    // Cleanup materials on unmount
+    return () => {
+      scene.traverse((child) => {
+        if ((child as THREE.Mesh).isMesh) {
+          const mesh = child as THREE.Mesh;
+          if (!Array.isArray(mesh.material)) {
+            mesh.material.dispose();
+          }
+        }
+      });
+    };
+  }, [scene]);
+
   const textureUrl = useTextureStore((state) => state.textureUrl);
   const mugColor = useSceneStore((state) => state.mugColor);
 
   const { height, radius, scale, yOffset } = useMemo(() => {
+    if (!scene) {
+      return { height: 0, radius: 0, scale: 1, yOffset: 0 };
+    }
     const box = new THREE.Box3().setFromObject(scene);
     const size = new THREE.Vector3();
     box.getSize(size);
@@ -122,6 +158,7 @@ function MugWithPrint() {
   }, [scene]);
 
   useEffect(() => {
+    if (!scene) return;
     // Only update colors on the already cloned scene
     scene.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
@@ -139,8 +176,10 @@ function MugWithPrint() {
     });
   }, [scene, mugColor]);
 
+  if (!scene) return null;
+
   return (
-    <group>
+    <group dispose={null}>
       <primitive
         object={scene}
         scale={[scale, scale, scale]}
@@ -169,7 +208,7 @@ export function MugLights({
         position={[8, 10, 8]}
         intensity={intensity}
         castShadow
-        shadow-mapSize={[2048, 2048]}
+        shadow-mapSize={[512, 512]}
         shadow-bias={-0.0001}
       />
       <directionalLight position={[-8, 10, -8]} intensity={intensity * 0.4} />
@@ -177,22 +216,55 @@ export function MugLights({
   );
 }
 
-export function MugContent({ mugRotation = 0 }: { mugRotation?: number }) {
+export function MugContent({
+  mugRotation = 0,
+  enableInternalRotation = true,
+}: {
+  mugRotation?: number;
+  enableInternalRotation?: boolean;
+}) {
   const showGrid = useSceneStore((state) => state.showGrid);
+  const animationTemplate = useSceneStore((state) => state.animationTemplate);
+  const animationTrigger = useSceneStore((state) => state.animationTrigger);
+  const { clock } = useThree();
+  const startTimeRef = useRef(0);
+  const groupRef = useRef<THREE.Group>(null);
+
+  useEffect(() => {
+    if (enableInternalRotation) {
+      startTimeRef.current = clock.getElapsedTime();
+    }
+  }, [animationTemplate, animationTrigger, clock, enableInternalRotation]);
+
+  useFrame(({ clock }) => {
+    if (!enableInternalRotation || !groupRef.current) return;
+
+    if (animationTemplate === "mug-rotation") {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const config = (ANIMATION_CONFIG as any)["mug-rotation"];
+      if (!config) return;
+
+      const duration = config.durationInSeconds;
+      const time = clock.getElapsedTime();
+      const elapsed = time - startTimeRef.current;
+      const progress = (elapsed % duration) / duration;
+      groupRef.current.rotation.y = progress * Math.PI * 2;
+    } else {
+      if (groupRef.current.rotation.y !== 0) {
+        groupRef.current.rotation.y = 0;
+      }
+    }
+  });
+
+  const rotationY = enableInternalRotation ? 0 : mugRotation;
 
   return (
     <>
-      <group position={[0, -2, 0]} rotation={[0, mugRotation, 0]}>
+      <group ref={groupRef} position={[0, -2, 0]} rotation={[0, rotationY, 0]}>
         <Suspense fallback={null}>
           <MugWithPrint />
-
-          <MugLights intensity={0.6} ambientIntensity={0.4} />
         </Suspense>
       </group>
-
-      <EffectComposer enableNormalPass={false}>
-        <Vignette eskil={false} offset={0.1} darkness={0.4} />
-      </EffectComposer>
 
       {showGrid && (
         <group position={[0, -2, 0]}>
@@ -209,12 +281,12 @@ export function MugContent({ mugRotation = 0 }: { mugRotation?: number }) {
             sectionColor="#4b5563"
           />
           <ContactShadows
-            position={[0, 0.01, 0]}
-            opacity={0.4}
-            scale={20}
-            blur={2}
-            far={4}
-            resolution={1024}
+            position={[0, 0, 0]}
+            opacity={0.3}
+            scale={10}
+            blur={1.5}
+            far={2}
+            resolution={512}
             color="#000000"
           />
         </group>

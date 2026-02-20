@@ -1,22 +1,20 @@
 "use client";
 
 import { ENVIRONMENT_PRESETS } from "@/config/presets";
-import { EnvironmentPreset, useSceneStore } from "@/store/useSceneStore";
-import { Environment, useEnvironment } from "@react-three/drei";
-import { useFrame, useThree } from "@react-three/fiber";
+import { useSceneStore } from "@/store/useSceneStore";
+import { Environment } from "@react-three/drei";
+import { useFrame, useLoader, useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
 function BackgroundImage({
-  preset,
-  files,
+  imageUrl,
   blur,
 }: {
-  preset: EnvironmentPreset;
-  files?: string | string[];
+  imageUrl: string;
   blur: boolean;
 }) {
-  const texture = useEnvironment(files ? { files } : { preset });
+  const texture = useLoader(THREE.TextureLoader, imageUrl);
   const { scene } = useThree();
 
   // Use refs to access latest props in useFrame without re-subscribing
@@ -24,9 +22,16 @@ function BackgroundImage({
   const blurRef = useRef(blur);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/immutability
+    texture.mapping = THREE.EquirectangularReflectionMapping;
+
+    texture.colorSpace = THREE.SRGBColorSpace;
     textureRef.current = texture;
+  }, [texture]);
+
+  useEffect(() => {
     blurRef.current = blur;
-  }, [texture, blur]);
+  }, [blur]);
 
   // Enforce background and blur on every frame to prevent resets
   // from other components (like Environment updates or interactions)
@@ -92,11 +97,10 @@ export function SceneEnvironment() {
       />
 
       {/* Arrière-plan Environnement (si activé) */}
-      {backgroundStyle === "image" && (
+      {backgroundStyle === "image" && currentPresetConfig?.image && (
         <BackgroundImage
           key={backgroundPreset}
-          preset={backgroundPreset}
-          files={currentPresetConfig?.files}
+          imageUrl={currentPresetConfig.image}
           blur={blurBackground}
         />
       )}

@@ -371,7 +371,10 @@ export const MugVideo = () => {
           <SceneEnvironment />
         </Suspense>
         <MugLights />
-        <MugContent mugRotation={mugRotation} />
+        <MugContent
+          mugRotation={mugRotation}
+          enableInternalRotation={false}
+        />
         <VideoCamera frame={frame} durationInFrames={durationInFrames} />
       </ThreeCanvas>
     </AbsoluteFill>

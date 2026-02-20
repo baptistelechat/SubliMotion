@@ -2,10 +2,11 @@
 
 import { cn } from "@/lib/utils";
 import { MUG_COLORS, useSceneStore } from "@/store/useSceneStore";
-import { Label } from "./ui/label";
+import { Label } from "@/components/ui/label";
 
 export function ColorControls() {
-  const { mugColor, setMugColor } = useSceneStore();
+  const mugColor = useSceneStore((state) => state.mugColor);
+  const setMugColor = useSceneStore((state) => state.setMugColor);
 
   return (
     <div>

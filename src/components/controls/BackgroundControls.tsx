@@ -12,16 +12,16 @@ import {
 import { Check } from "lucide-react";
 
 export function BackgroundControls() {
-  const {
-    backgroundStyle,
-    setBackgroundStyle,
-    backgroundColor,
-    setBackgroundColor,
-    backgroundPreset,
-    setBackgroundPreset,
-    blurBackground,
-    setBlurBackground,
-  } = useSceneStore();
+  const backgroundStyle = useSceneStore((state) => state.backgroundStyle);
+  const setBackgroundStyle = useSceneStore((state) => state.setBackgroundStyle);
+  const backgroundColor = useSceneStore((state) => state.backgroundColor);
+  const setBackgroundColor = useSceneStore((state) => state.setBackgroundColor);
+  const backgroundPreset = useSceneStore((state) => state.backgroundPreset);
+  const setBackgroundPreset = useSceneStore(
+    (state) => state.setBackgroundPreset,
+  );
+  const blurBackground = useSceneStore((state) => state.blurBackground);
+  const setBlurBackground = useSceneStore((state) => state.setBlurBackground);
 
   const backgrounds = [
     {
@@ -130,7 +130,7 @@ export function BackgroundControls() {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <Label className="text-sm font-medium text-gray-700">
-            Environnements 
+            Environnements
           </Label>
           {backgroundStyle === "image" && (
             <div className="flex items-center space-x-2 animate-in fade-in zoom-in duration-200">
@@ -166,11 +166,11 @@ export function BackgroundControls() {
               )}
               title={preset.label}
             >
-              {/* Image de fond */}
+              {/* Gradient d'aperçu */}
               <div
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                className="absolute inset-0 transition-transform duration-500 group-hover:scale-110"
                 style={{
-                  backgroundImage: `url(${preset.image})`,
+                  background: preset.gradient,
                 }}
               />
 

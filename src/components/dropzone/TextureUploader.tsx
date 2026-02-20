@@ -8,7 +8,8 @@ import { useDropzone, type FileRejection } from "react-dropzone";
 import { toast } from "sonner";
 
 export function TextureUploader() {
-  const { textureUrl, setTexture } = useTextureStore();
+  const setTexture = useTextureStore((state) => state.setTexture);
+  const textureUrl = useTextureStore((state) => state.textureUrl);
 
   const onDrop = useCallback(
     (acceptedFiles: File[], fileRejections: FileRejection[]) => {

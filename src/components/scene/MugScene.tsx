@@ -5,7 +5,7 @@ import { CAMERA_CONFIGS } from "@/config/camera";
 import { useSceneStore } from "@/store/useSceneStore";
 import { CameraControls, useGLTF, useProgress } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Suspense, useEffect, useRef, useState, type ElementRef } from "react";
+import { Suspense, useEffect, useRef, type ElementRef } from "react";
 import * as THREE from "three";
 import { MugContent, MugLights } from "./MugContent";
 import { SceneEnvironment } from "./SceneEnvironment";
@@ -445,38 +445,7 @@ function SceneController() {
   );
 }
 
-function MugRotationController({
-  children,
-}: {
-  children: (rotation: number) => React.ReactNode;
-}) {
-  const animationTemplate = useSceneStore((state) => state.animationTemplate);
-  const animationTrigger = useSceneStore((state) => state.animationTrigger);
-  const { clock } = useThree();
-  const startTimeRef = useRef(0);
 
-  useEffect(() => {
-    startTimeRef.current = clock.getElapsedTime();
-  }, [animationTemplate, animationTrigger, clock]);
-
-  const [rotation, setRotation] = useState(0);
-
-  useFrame(({ clock }) => {
-    if (animationTemplate === "mug-rotation") {
-      const config = ANIMATION_CONFIG["mug-rotation"];
-      const duration = config.durationInSeconds;
-      const time = clock.getElapsedTime();
-      const elapsed = time - startTimeRef.current;
-      const progress = (elapsed % duration) / duration;
-      setRotation(progress * Math.PI * 2);
-    } else {
-      // Always reset to 0 if not mug-rotation, but avoid infinite loop if already 0
-      if (rotation !== 0) setRotation(0);
-    }
-  });
-
-  return <>{children(rotation)}</>;
-}
 
 export default function MugScene() {
   const backgroundColor = useSceneStore((state) => state.backgroundColor);
@@ -488,19 +457,24 @@ export default function MugScene() {
     >
       <Canvas
         shadows
-        camera={{ position: [6, 4, 7], fov: 45 }}
-        gl={{ antialias: true }}
-        dpr={[1, 2]}
+        dpr={[1, 1.5]}
+        camera={{ position: [0, 2, 6], fov: 45 }}
+        gl={{
+          preserveDrawingBuffer: true,
+          toneMapping: THREE.ACESFilmicToneMapping,
+          toneMappingExposure: 0.9,
+          antialias: true,
+        }}
       >
         <Suspense fallback={null}>
           <SceneEnvironment />
         </Suspense>
-        <MugLights />
-        <MugRotationController>
-          {(rotation) => <MugContent mugRotation={rotation} />}
-        </MugRotationController>
+        <MugLights intensity={0.6} ambientIntensity={0.4} />
+        <MugContent enableInternalRotation={true} />
         <SceneController />
       </Canvas>
+      {/* CSS Vignette for performance */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_50%,rgba(0,0,0,0.4)_120%)]" />
       <CustomLoader />
     </div>
   );
