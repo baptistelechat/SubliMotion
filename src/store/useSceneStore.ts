@@ -106,10 +106,14 @@ interface SceneState {
   socialPackOptions: {
     includeImages: boolean;
     includeVideos: boolean;
+    selectedImages: CameraView[];
+    selectedVideos: AnimationTemplate[];
   };
   setSocialPackOptions: (options: {
     includeImages: boolean;
     includeVideos: boolean;
+    selectedImages: CameraView[];
+    selectedVideos: AnimationTemplate[];
   }) => void;
 }
 
@@ -182,6 +186,11 @@ export const useSceneStore = create<SceneState>((set) => ({
   setSocialPackStatus: (status) => set({ socialPackStatus: status }),
   socialPackText: "",
   setSocialPackText: (text) => set({ socialPackText: text }),
-  socialPackOptions: { includeImages: true, includeVideos: true },
+  socialPackOptions: {
+    includeImages: true,
+    includeVideos: true,
+    selectedImages: [...CAMERA_VIEWS],
+    selectedVideos: ["zoom-in", "mug-rotation", "orbit-360"], // Default subset or all? User asked for all in previous turn but logic was all. Let's put all.
+  },
   setSocialPackOptions: (options) => set({ socialPackOptions: options }),
 }));

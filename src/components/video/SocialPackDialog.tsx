@@ -9,8 +9,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Label } from "@/components/ui/label";
-import { IMAGE_CONFIG, VIDEO_CONFIG } from "@/config/animations";
+import { ANIMATION_TEMPLATES, AnimationTemplate } from "@/config/animations";
+import { CAMERA_VIEWS } from "@/config/camera";
 import { SOCIAL_PACK_CONFIG } from "@/config/social-pack";
 import { useSceneStore } from "@/store/useSceneStore";
 import {
@@ -171,56 +178,141 @@ export function SocialPackDialog() {
             </div>
 
             <div className="grid gap-3 p-3 border rounded-md bg-muted/20">
-              <div className="flex items-start space-x-3">
-                <Checkbox
-                  id="include-videos"
-                  checked={socialPackOptions.includeVideos}
-                  onCheckedChange={(checked) =>
-                    setSocialPackOptions({
-                      ...socialPackOptions,
-                      includeVideos: checked === true,
-                    })
-                  }
-                />
-                <div className="grid gap-1.5 leading-none">
-                  <Label
-                    htmlFor="include-videos"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Vidéos (Animations)
-                  </Label>
-                  <p className="text-xs text-muted-foreground">
-                    Toutes les animations vidéo (Format Carré{" "}
-                    {VIDEO_CONFIG.WIDTH}x{VIDEO_CONFIG.HEIGHT} -{" "}
-                    {VIDEO_CONFIG.FPS}fps)
-                  </p>
-                </div>
-              </div>
+              <Accordion type="multiple" className="w-full">
+                <AccordionItem value="videos" className="border-b-0">
+                  <div className="flex items-center space-x-3 py-2">
+                    <Checkbox
+                      id="include-videos"
+                      checked={
+                        socialPackOptions.selectedVideos.length ===
+                        Object.keys(ANIMATION_TEMPLATES).length
+                          ? true
+                          : socialPackOptions.selectedVideos.length > 0
+                            ? "indeterminate"
+                            : false
+                      }
+                      onCheckedChange={(checked) => {
+                        setSocialPackOptions({
+                          ...socialPackOptions,
+                          includeVideos: !!checked,
+                          selectedVideos: checked
+                            ? (Object.keys(ANIMATION_TEMPLATES) as any)
+                            : [],
+                        });
+                      }}
+                    />
+                    <div className="flex-1">
+                      <AccordionTrigger className="py-0 hover:no-underline">
+                        <div className="grid gap-1.5 leading-none text-left">
+                          <Label
+                            htmlFor="include-videos"
+                            className="text-sm font-medium leading-none cursor-pointer"
+                          >
+                            Vidéos (Animations)
+                          </Label>
+                          <p className="text-xs text-muted-foreground font-normal">
+                            {socialPackOptions.selectedVideos.length} sélectionnée(s)
+                          </p>
+                        </div>
+                      </AccordionTrigger>
+                    </div>
+                  </div>
+                  <AccordionContent className="pl-7 pr-2 pt-2">
+                    <div className="grid gap-2">
+                      {Object.entries(ANIMATION_TEMPLATES).map(([key, config]) => (
+                        <div key={key} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`video-${key}`}
+                            checked={socialPackOptions.selectedVideos.includes(
+                              key as any
+                            )}
+                            onCheckedChange={(checked) => {
+                              const current = socialPackOptions.selectedVideos;
+                              const updated = checked
+                                ? [...current, key as AnimationTemplate]
+                                : current.filter((k) => k !== key);
+                              
+                              setSocialPackOptions({
+                                ...socialPackOptions,
+                                selectedVideos: updated,
+                                includeVideos: updated.length > 0,
+                              });
+                            }}
+                          />
+                          <Label htmlFor={`video-${key}`} className="text-xs">
+                            {config.label}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
 
-              <div className="flex items-start space-x-3">
-                <Checkbox
-                  id="include-images"
-                  checked={socialPackOptions.includeImages}
-                  onCheckedChange={(checked) =>
-                    setSocialPackOptions({
-                      ...socialPackOptions,
-                      includeImages: checked === true,
-                    })
-                  }
-                />
-                <div className="grid gap-1.5 leading-none">
-                  <Label
-                    htmlFor="include-images"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Images (Vues Caméra)
-                  </Label>
-                  <p className="text-xs text-muted-foreground">
-                    Images de toutes les vues caméra (Format Carré{" "}
-                    {IMAGE_CONFIG.WIDTH}x{IMAGE_CONFIG.HEIGHT})
-                  </p>
-                </div>
-              </div>
+                <AccordionItem value="images" className="border-b-0 border-t">
+                  <div className="flex items-center space-x-3 py-2">
+                    <Checkbox
+                      id="include-images"
+                      checked={
+                        socialPackOptions.selectedImages.length ===
+                        CAMERA_VIEWS.length
+                          ? true
+                          : socialPackOptions.selectedImages.length > 0
+                            ? "indeterminate"
+                            : false
+                      }
+                      onCheckedChange={(checked) => {
+                        setSocialPackOptions({
+                          ...socialPackOptions,
+                          includeImages: !!checked,
+                          selectedImages: checked ? [...CAMERA_VIEWS] : [],
+                        });
+                      }}
+                    />
+                    <div className="flex-1">
+                      <AccordionTrigger className="py-0 hover:no-underline">
+                        <div className="grid gap-1.5 leading-none text-left">
+                          <Label
+                            htmlFor="include-images"
+                            className="text-sm font-medium leading-none cursor-pointer"
+                          >
+                            Images (Vues Caméra)
+                          </Label>
+                          <p className="text-xs text-muted-foreground font-normal">
+                            {socialPackOptions.selectedImages.length} sélectionnée(s)
+                          </p>
+                        </div>
+                      </AccordionTrigger>
+                    </div>
+                  </div>
+                  <AccordionContent className="pl-7 pr-2 pt-2">
+                    <div className="grid grid-cols-2 gap-2">
+                      {CAMERA_VIEWS.map((view) => (
+                        <div key={view} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`image-${view}`}
+                            checked={socialPackOptions.selectedImages.includes(view)}
+                            onCheckedChange={(checked) => {
+                              const current = socialPackOptions.selectedImages;
+                              const updated = checked
+                                ? [...current, view]
+                                : current.filter((v) => v !== view);
+                              
+                              setSocialPackOptions({
+                                ...socialPackOptions,
+                                selectedImages: updated,
+                                includeImages: updated.length > 0,
+                              });
+                            }}
+                          />
+                          <Label htmlFor={`image-${view}`} className="text-xs capitalize">
+                            {view}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </div>
 
             <div className="text-xs text-muted-foreground pl-4 border-l-2">

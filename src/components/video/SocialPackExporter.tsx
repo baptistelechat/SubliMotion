@@ -6,7 +6,7 @@ import {
   IMAGE_CONFIG,
   VIDEO_CONFIG,
 } from "@/config/animations";
-import { CAMERA_VIEWS, CameraView, useSceneStore } from "@/store/useSceneStore";
+import { CameraView, useSceneStore } from "@/store/useSceneStore";
 import { Canvas, useThree } from "@react-three/fiber";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
@@ -22,7 +22,8 @@ import { CAMERA_CONFIGS } from "@/config/camera";
 
 type ExportTask =
   | { type: "image"; name: CameraView }
-  | { type: "video"; name: AnimationTemplate; duration?: number };
+  | { type: "video"; name: AnimationTemplate; duration?: number }
+  | { type: "warmup"; name: "warmup" };
 
 // Internal component to handle scene updates and capturing
 function ExporterScene({
@@ -133,6 +134,11 @@ export function SocialPackExporter() {
       // Wait a bit for camera to settle (even though we set it directly)
       // The render loop will trigger capture
       setCurrentFrame(0); // Trigger render
+    } else if (nextTask.type === "warmup") {
+      setSocialPackStatus("Initialisation du rendu...");
+      setAnimationTemplate(null);
+      setCameraView("iso1");
+      setCurrentFrame(0);
     } else if (nextTask.type === "video") {
       setSocialPackStatus(`Génération de la vidéo : ${nextTask.name}...`);
       setCameraView(null);
@@ -183,23 +189,28 @@ export function SocialPackExporter() {
       // Build task queue
       const tasks: ExportTask[] = [];
 
+      // Add Warmup Task
+      tasks.push({ type: "warmup", name: "warmup" });
+
       // Images
       if (socialPackOptions.includeImages) {
-        CAMERA_VIEWS.forEach((view) => {
+        socialPackOptions.selectedImages.forEach((view) => {
           tasks.push({ type: "image", name: view });
         });
       }
 
       // Videos
       if (socialPackOptions.includeVideos) {
-        Object.keys(ANIMATION_CONFIG).forEach((anim) => {
-          tasks.push({
-            type: "video",
-            name: anim as AnimationTemplate,
-            duration:
-              ANIMATION_CONFIG[anim as keyof typeof ANIMATION_CONFIG]
-                .durationInSeconds * fps,
-          });
+        socialPackOptions.selectedVideos.forEach((anim) => {
+          if (ANIMATION_CONFIG[anim]) {
+            tasks.push({
+              type: "video",
+              name: anim as AnimationTemplate,
+              duration:
+                ANIMATION_CONFIG[anim as keyof typeof ANIMATION_CONFIG]
+                  .durationInSeconds * fps,
+            });
+          }
         });
       }
 
@@ -230,7 +241,14 @@ export function SocialPackExporter() {
         // 1. Render
         gl.render(scene, camera);
 
-        if (currentTask.type === "image") {
+        if (currentTask.type === "warmup") {
+          const WARMUP_FRAMES = 30;
+          if (currentFrame < WARMUP_FRAMES) {
+            setCurrentFrame(currentFrame + 1);
+          } else {
+            processNextTask();
+          }
+        } else if (currentTask.type === "image") {
           // Capture Image
           const blob = await new Promise<Blob | null>((resolve) =>
             gl.domElement.toBlob(resolve, "image/png"),
@@ -300,6 +318,7 @@ export function SocialPackExporter() {
       setIsExportingSocialPack,
       setSocialPackProgress,
       fps,
+      currentFrame,
     ],
   );
 
@@ -330,7 +349,7 @@ export function SocialPackExporter() {
       }}
     >
       <Canvas
-        frameloop="demand"
+        frameloop="always"
         gl={{
           antialias: true,
           logarithmicDepthBuffer: true,
