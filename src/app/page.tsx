@@ -49,8 +49,9 @@ const VideoPreview = dynamic(
   },
 );
 
-import { SocialPackDialog } from "@/components/video/SocialPackDialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { SocialPackDialog } from "@/components/video/SocialPackDialog";
+import Image from "next/image";
 
 const SocialPackExporter = dynamic(
   () =>
@@ -64,10 +65,21 @@ function LandingView() {
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center bg-background text-foreground p-4 relative">
       <div className="max-w-3xl w-full space-y-8 text-center">
-        <div className="space-y-2">
-          <h1 className="text-4xl md:text-6xl font-bold bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+        <div className="space-y-2 flex flex-col items-center">
+          <div className="flex gap-4 items-end">
+
+          <Image
+            src="/icon.svg"
+            alt="SubliMotion Logo"
+            width={100}
+            height={100}
+            priority
+            className="mb-2"
+          />
+          <h1 className="text-4xl md:text-6xl font-bold bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent pb-2">
             SubliMotion
           </h1>
+          </div>
           <p className="text-xl text-muted-foreground">
             Visualisez vos designs sur mug en 3D instantanément.
           </p>
@@ -183,12 +195,21 @@ function EditorView() {
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
-            <h1 className="text-xl font-bold bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-              SubliMotion{" "}
-              <span className="text-xs font-normal text-muted-foreground ml-2">
-                Éditeur
-              </span>
-            </h1>
+            <div className="flex items-center gap-2">
+              <Image
+                src="/icon.svg"
+                alt="SubliMotion Logo"
+                width={32}
+                height={32}
+                className="size-6"
+              />
+              <h1 className="text-xl font-bold bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+                SubliMotion{" "}
+                <span className="text-xs font-normal text-muted-foreground ml-2">
+                  Éditeur
+                </span>
+              </h1>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <Button
