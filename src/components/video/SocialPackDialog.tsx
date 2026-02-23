@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -9,12 +15,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Label } from "@/components/ui/label";
 import { ANIMATION_TEMPLATES, AnimationTemplate } from "@/config/animations";
 import { CAMERA_VIEWS } from "@/config/camera";
@@ -156,6 +156,10 @@ export function SocialPackDialog() {
                     setSocialPackOptions({
                       includeImages: true,
                       includeVideos: true,
+                      selectedImages: [...CAMERA_VIEWS],
+                      selectedVideos: Object.keys(
+                        ANIMATION_TEMPLATES,
+                      ) as AnimationTemplate[],
                     })
                   }
                   className="hover:text-primary transition-colors underline decoration-dotted"
@@ -168,6 +172,8 @@ export function SocialPackDialog() {
                     setSocialPackOptions({
                       includeImages: false,
                       includeVideos: false,
+                      selectedImages: [],
+                      selectedVideos: [],
                     })
                   }
                   className="hover:text-primary transition-colors underline decoration-dotted"
@@ -196,7 +202,9 @@ export function SocialPackDialog() {
                           ...socialPackOptions,
                           includeVideos: !!checked,
                           selectedVideos: checked
-                            ? (Object.keys(ANIMATION_TEMPLATES) as any)
+                            ? (Object.keys(
+                                ANIMATION_TEMPLATES,
+                              ) as AnimationTemplate[])
                             : [],
                         });
                       }}
@@ -211,7 +219,8 @@ export function SocialPackDialog() {
                             Vidéos (Animations)
                           </Label>
                           <p className="text-xs text-muted-foreground font-normal">
-                            {socialPackOptions.selectedVideos.length} sélectionnée(s)
+                            {socialPackOptions.selectedVideos.length}{" "}
+                            sélectionnée(s)
                           </p>
                         </div>
                       </AccordionTrigger>
@@ -219,31 +228,37 @@ export function SocialPackDialog() {
                   </div>
                   <AccordionContent className="pl-7 pr-2 pt-2">
                     <div className="grid gap-2">
-                      {Object.entries(ANIMATION_TEMPLATES).map(([key, config]) => (
-                        <div key={key} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`video-${key}`}
-                            checked={socialPackOptions.selectedVideos.includes(
-                              key as any
-                            )}
-                            onCheckedChange={(checked) => {
-                              const current = socialPackOptions.selectedVideos;
-                              const updated = checked
-                                ? [...current, key as AnimationTemplate]
-                                : current.filter((k) => k !== key);
-                              
-                              setSocialPackOptions({
-                                ...socialPackOptions,
-                                selectedVideos: updated,
-                                includeVideos: updated.length > 0,
-                              });
-                            }}
-                          />
-                          <Label htmlFor={`video-${key}`} className="text-xs">
-                            {config.label}
-                          </Label>
-                        </div>
-                      ))}
+                      {Object.entries(ANIMATION_TEMPLATES).map(
+                        ([key, config]) => (
+                          <div
+                            key={key}
+                            className="flex items-center space-x-2"
+                          >
+                            <Checkbox
+                              id={`video-${key}`}
+                              checked={socialPackOptions.selectedVideos.includes(
+                                key as AnimationTemplate,
+                              )}
+                              onCheckedChange={(checked) => {
+                                const current =
+                                  socialPackOptions.selectedVideos;
+                                const updated = checked
+                                  ? [...current, key as AnimationTemplate]
+                                  : current.filter((k) => k !== key);
+
+                                setSocialPackOptions({
+                                  ...socialPackOptions,
+                                  selectedVideos: updated,
+                                  includeVideos: updated.length > 0,
+                                });
+                              }}
+                            />
+                            <Label htmlFor={`video-${key}`} className="text-xs">
+                              {config.label}
+                            </Label>
+                          </div>
+                        ),
+                      )}
                     </div>
                   </AccordionContent>
                 </AccordionItem>
@@ -278,7 +293,8 @@ export function SocialPackDialog() {
                             Images (Vues Caméra)
                           </Label>
                           <p className="text-xs text-muted-foreground font-normal">
-                            {socialPackOptions.selectedImages.length} sélectionnée(s)
+                            {socialPackOptions.selectedImages.length}{" "}
+                            sélectionnée(s)
                           </p>
                         </div>
                       </AccordionTrigger>
@@ -290,13 +306,15 @@ export function SocialPackDialog() {
                         <div key={view} className="flex items-center space-x-2">
                           <Checkbox
                             id={`image-${view}`}
-                            checked={socialPackOptions.selectedImages.includes(view)}
+                            checked={socialPackOptions.selectedImages.includes(
+                              view,
+                            )}
                             onCheckedChange={(checked) => {
                               const current = socialPackOptions.selectedImages;
                               const updated = checked
                                 ? [...current, view]
                                 : current.filter((v) => v !== view);
-                              
+
                               setSocialPackOptions({
                                 ...socialPackOptions,
                                 selectedImages: updated,
@@ -304,7 +322,10 @@ export function SocialPackDialog() {
                               });
                             }}
                           />
-                          <Label htmlFor={`image-${view}`} className="text-xs capitalize">
+                          <Label
+                            htmlFor={`image-${view}`}
+                            className="text-xs capitalize"
+                          >
                             {view}
                           </Label>
                         </div>

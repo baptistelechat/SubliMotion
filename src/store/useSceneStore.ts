@@ -1,4 +1,4 @@
-import { AnimationTemplate } from "@/config/animations";
+import { ANIMATION_TEMPLATES, AnimationTemplate } from "@/config/animations";
 import { CAMERA_VIEWS, CameraView } from "@/config/camera";
 import { create } from "zustand";
 
@@ -190,7 +190,7 @@ export const useSceneStore = create<SceneState>((set) => ({
     includeImages: true,
     includeVideos: true,
     selectedImages: [...CAMERA_VIEWS],
-    selectedVideos: ["zoom-in", "mug-rotation", "orbit-360"], // Default subset or all? User asked for all in previous turn but logic was all. Let's put all.
+    selectedVideos: Object.keys(ANIMATION_TEMPLATES) as AnimationTemplate[],
   },
   setSocialPackOptions: (options) => set({ socialPackOptions: options }),
 }));

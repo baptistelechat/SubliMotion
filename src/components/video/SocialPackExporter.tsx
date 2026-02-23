@@ -6,8 +6,9 @@ import {
   IMAGE_CONFIG,
   VIDEO_CONFIG,
 } from "@/config/animations";
+import { CAMERA_CONFIGS } from "@/config/camera";
 import { CameraView, useSceneStore } from "@/store/useSceneStore";
-import { Canvas, useThree } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
 import * as Muxer from "mp4-muxer";
@@ -18,38 +19,116 @@ import * as THREE from "three";
 import { MugContent, MugLights } from "../scene/MugContent";
 import { SceneEnvironment } from "../scene/SceneEnvironment";
 import { VideoCamera } from "./MugVideo";
-import { CAMERA_CONFIGS } from "@/config/camera";
 
 type ExportTask =
   | { type: "image"; name: CameraView }
-  | { type: "video"; name: AnimationTemplate; duration?: number }
-  | { type: "warmup"; name: "warmup" };
+  | { type: "video"; name: AnimationTemplate; duration?: number };
+
+// Helper to check if scene is ready for capture
+function isSceneReady(
+  gl: THREE.WebGLRenderer,
+  scene: THREE.Scene,
+  camera: THREE.Camera,
+  task: ExportTask,
+): boolean {
+  const state = useSceneStore.getState();
+  const { width, height } = gl.domElement;
+
+  // 1. Resolution
+  const targetWidth =
+    task.type === "image" ? IMAGE_CONFIG.WIDTH : VIDEO_CONFIG.WIDTH;
+  const targetHeight =
+    task.type === "image" ? IMAGE_CONFIG.HEIGHT : VIDEO_CONFIG.HEIGHT;
+
+  if (width !== targetWidth || height !== targetHeight) {
+    if (Math.random() < 0.02)
+      console.log(
+        `[SocialExport] Waiting for resolution: ${width}x${height} -> ${targetWidth}x${targetHeight}`,
+      );
+    return false;
+  }
+
+  // 2. Camera Aspect
+  if (camera instanceof THREE.PerspectiveCamera) {
+    const targetAspect = targetWidth / targetHeight;
+    if (Math.abs(camera.aspect - targetAspect) > 0.01) {
+      camera.aspect = targetAspect;
+      camera.updateProjectionMatrix();
+      // Do not return false here, as we just fixed it and it applies instantly for the next render
+    }
+  }
+
+  // 3. Background
+  if (state.backgroundStyle === "image") {
+    if (!scene.background || !(scene.background instanceof THREE.Texture)) {
+      if (Math.random() < 0.02)
+        console.log("[SocialExport] Waiting for background texture assignment");
+      return false;
+    }
+    // Check if texture image is loaded
+    const tex = scene.background;
+    const image = tex.image as
+      | { width: number; height: number }
+      | HTMLImageElement
+      | undefined;
+    if (!image || image.width === 0) {
+      if (Math.random() < 0.02)
+        console.log("[SocialExport] Waiting for texture image load");
+      return false;
+    }
+
+    // Check Blur
+    const expectedBlur = state.blurBackground ? 0.5 : 0;
+    // Always enforce blur setting before render to avoid glitches
+    if (scene.backgroundBlurriness !== expectedBlur) {
+      scene.backgroundBlurriness = expectedBlur;
+    }
+    // Do not return false for blur mismatch, as we just fixed it
+  } else if (state.backgroundStyle === "color") {
+    if (!scene.background || !(scene.background instanceof THREE.Color)) {
+      if (Math.random() < 0.02)
+        console.log("[SocialExport] Waiting for background color");
+      return false;
+    }
+  }
+
+  return true;
+}
 
 // Internal component to handle scene updates and capturing
 function ExporterScene({
-  frame,
   onRender,
 }: {
-  frame: number;
   onRender: (
     gl: THREE.WebGLRenderer,
     scene: THREE.Scene,
     camera: THREE.Camera,
-  ) => void;
+  ) => Promise<void>;
 }) {
-  const { gl, scene, camera } = useThree();
+  const { gl, scene, camera, size } = useThree();
+  const isRenderingRef = useRef(false);
 
+  // Force camera aspect update when size changes to prevent "squashed" look
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      onRender(gl, scene, camera);
-    }, 0);
-    return () => clearTimeout(timeout);
-  }, [frame, gl, scene, camera, onRender]);
+    if (camera instanceof THREE.PerspectiveCamera) {
+      camera.aspect = size.width / size.height;
+      camera.updateProjectionMatrix();
+    }
+  }, [camera, size.width, size.height]);
+
+  useFrame(async () => {
+    if (isRenderingRef.current) return;
+
+    isRenderingRef.current = true;
+    try {
+      await onRender(gl, scene, camera);
+    } finally {
+      isRenderingRef.current = false;
+    }
+  });
 
   return null;
 }
-
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export function SocialPackExporter() {
   const isExportingSocialPack = useSceneStore(
@@ -76,6 +155,9 @@ export function SocialPackExporter() {
 
   const [currentFrame, setCurrentFrame] = useState(0);
   const [currentTask, setCurrentTask] = useState<ExportTask | null>(null);
+
+  // Track the last completed task to prevent double processing
+  const lastCompletedTaskRef = useRef<ExportTask | null>(null);
 
   // Export context
   const zipRef = useRef<JSZip | null>(null);
@@ -131,14 +213,9 @@ export function SocialPackExporter() {
       setSocialPackStatus(`Génération de l'image : ${nextTask.name}...`);
       setAnimationTemplate(null);
       setCameraView(nextTask.name);
-      // Wait a bit for camera to settle (even though we set it directly)
+      // Wait a bit for camera to settle and Canvas to resize
       // The render loop will trigger capture
       setCurrentFrame(0); // Trigger render
-    } else if (nextTask.type === "warmup") {
-      setSocialPackStatus("Initialisation du rendu...");
-      setAnimationTemplate(null);
-      setCameraView("iso1");
-      setCurrentFrame(0);
     } else if (nextTask.type === "video") {
       setSocialPackStatus(`Génération de la vidéo : ${nextTask.name}...`);
       setCameraView(null);
@@ -169,7 +246,8 @@ export function SocialPackExporter() {
       });
 
       exportContext.current = { muxer, videoEncoder, frame: 0 };
-      setCurrentFrame(0); // Start at frame 0
+      // Start at -10 to allow for warmup (resize, camera settle)
+      setCurrentFrame(-10);
     }
   }, [
     setIsExportingSocialPack,
@@ -188,9 +266,6 @@ export function SocialPackExporter() {
 
       // Build task queue
       const tasks: ExportTask[] = [];
-
-      // Add Warmup Task
-      tasks.push({ type: "warmup", name: "warmup" });
 
       // Images
       if (socialPackOptions.includeImages) {
@@ -216,6 +291,7 @@ export function SocialPackExporter() {
 
       taskQueueRef.current = tasks;
       setSocialPackProgress(0);
+      lastCompletedTaskRef.current = null; // Reset tracking
 
       // Use setTimeout to avoid synchronous state update in effect
       setTimeout(() => processNextTask(), 0);
@@ -236,19 +312,18 @@ export function SocialPackExporter() {
       camera: THREE.Camera,
     ) => {
       if (!currentTask || !zipRef.current) return;
+      if (currentTask === lastCompletedTaskRef.current) return; // Skip if already completed
 
       try {
+        // 0. Check Readiness (replaces warmup/wait)
+        if (!isSceneReady(gl, scene, camera, currentTask)) {
+          return; // Wait for next frame
+        }
+
         // 1. Render
         gl.render(scene, camera);
 
-        if (currentTask.type === "warmup") {
-          const WARMUP_FRAMES = 30;
-          if (currentFrame < WARMUP_FRAMES) {
-            setCurrentFrame(currentFrame + 1);
-          } else {
-            processNextTask();
-          }
-        } else if (currentTask.type === "image") {
+        if (currentTask.type === "image") {
           // Capture Image
           const blob = await new Promise<Blob | null>((resolve) =>
             gl.domElement.toBlob(resolve, "image/png"),
@@ -259,15 +334,15 @@ export function SocialPackExporter() {
           }
 
           // Done with this task
-          await wait(100); // Small delay
+          lastCompletedTaskRef.current = currentTask; // Mark as completed
           processNextTask();
         } else if (currentTask.type === "video") {
           const ctx = exportContext.current;
           if (!ctx) return;
 
           // Check encoder pressure
-          if (ctx.videoEncoder.encodeQueueSize > 2) {
-            await wait(50);
+          if (ctx.videoEncoder.encodeQueueSize > 15) {
+            return; // Wait for encoder to catch up
           }
 
           const bitmap = await createImageBitmap(gl.domElement);
@@ -302,7 +377,7 @@ export function SocialPackExporter() {
             zipRef.current.file(`videos/${currentTask.name}.mp4`, buffer);
 
             exportContext.current = null;
-            await wait(100);
+            lastCompletedTaskRef.current = currentTask; // Mark as completed
             processNextTask();
           }
         }
@@ -318,7 +393,6 @@ export function SocialPackExporter() {
       setIsExportingSocialPack,
       setSocialPackProgress,
       fps,
-      currentFrame,
     ],
   );
 
@@ -328,9 +402,14 @@ export function SocialPackExporter() {
   let mugRotation = 0;
   if (currentTask?.type === "video" && currentTask.name === "mug-rotation") {
     const duration = currentTask.duration || 150;
-    mugRotation = interpolate(currentFrame, [0, duration], [0, Math.PI * 2], {
-      extrapolateRight: "clamp",
-    });
+    mugRotation = interpolate(
+      Math.max(0, currentFrame),
+      [0, duration],
+      [0, Math.PI * 2],
+      {
+        extrapolateRight: "clamp",
+      },
+    );
   }
 
   // Calculate duration for Camera
@@ -361,12 +440,19 @@ export function SocialPackExporter() {
         camera={{ position: [6, 4, 7], fov: 45, near: 0.1, far: 1000 }}
       >
         <Suspense fallback={null}>
-          <SceneEnvironment />
+          <SceneEnvironment
+            key={
+              currentTask ? `${currentTask.type}-${currentTask.name}` : "env"
+            }
+          />
           <MugLights />
-          <MugContent mugRotation={mugRotation} />
+          <MugContent
+            mugRotation={mugRotation}
+            enableInternalRotation={false}
+          />
           {currentTask?.type === "video" && (
             <VideoCamera
-              frame={currentFrame}
+              frame={Math.max(0, currentFrame)}
               durationInFrames={durationInFrames}
             />
           )}
@@ -380,8 +466,8 @@ export function SocialPackExporter() {
           {currentTask?.type === "image" && (
             <StaticCamera view={currentTask.name as CameraView} />
           )}
-          <ExporterScene frame={currentFrame} onRender={handleRender} />
         </Suspense>
+        <ExporterScene onRender={handleRender} />
       </Canvas>
     </div>
   );

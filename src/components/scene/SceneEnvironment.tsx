@@ -4,7 +4,7 @@ import { ENVIRONMENT_PRESETS } from "@/config/presets";
 import { useSceneStore } from "@/store/useSceneStore";
 import { Environment } from "@react-three/drei";
 import { useFrame, useLoader, useThree } from "@react-three/fiber";
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import * as THREE from "three";
 
 function BackgroundImage({
@@ -49,15 +49,19 @@ function BackgroundImage({
     }
   });
 
-  useEffect(() => {
+  // Use useLayoutEffect to ensure background is set before first paint
+  // This prevents the "flash" of unblurred background
+
+  useLayoutEffect(() => {
     // Initial setup
+
     // eslint-disable-next-line react-hooks/immutability
     scene.background = texture;
+
     scene.backgroundBlurriness = blur ? 0.5 : 0;
 
     return () => {
-      // Optional: Clean up if needed, but Environment might handle it
-      // scene.background = null;
+      // Optional: Clean up if needed
     };
   }, [texture, blur, scene]);
 
